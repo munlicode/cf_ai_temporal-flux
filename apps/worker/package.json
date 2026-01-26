@@ -1,0 +1,23 @@
+{
+  "name": "worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types --env-interface Env"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.2",
+    "@cloudflare/ai-chat": "^0.0.4",
+    "agents": "^0.3.3",
+    "ai": "^6.0.5",
+    "workers-ai-provider": "^3.0.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251231.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.60.0"
+  }
+}

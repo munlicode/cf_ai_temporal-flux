@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build Outputs
+dist/
+build/
+bin/
+tmp/
+
+# Environment Variables (CRITICAL)
+.env
+.env.local
+*.key
+*.pem
+*.pat
+
+# OS Trash
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Misc
+*.swp
+*.swo
+*~
+
+.turbo
+.wrangler
