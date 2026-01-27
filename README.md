@@ -35,6 +35,10 @@ pnpm dev
 pnpm run deploy
 ```
 
+## Monorepo Decision
+Decision on making it monorepo with pnpm as package manager, powered with turbo is to separate concern of backend and client, while keeping development as simple as possible.
+
+
 ## 🤖 AI Assisted
 
 This project is built with AI assistance. Significant prompts and logic generations are documented in [PROMPTS.md](./PROMPTS.md).
