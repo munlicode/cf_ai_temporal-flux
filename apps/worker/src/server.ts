@@ -52,7 +52,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   ) {
     console.log("Processing chat message...");
     const ai = createWorkersAI({ binding: this.env.AI });
-    const model = ai("@cf/meta/llama-3.1-8b-instruct");
+    const model = ai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
     console.log("Model initialized:", model.modelId);
 
     // Collect all tools, including MCP tools
@@ -84,7 +84,16 @@ export class Chat extends AIChatAgent<Env, FluxState> {
 
         const result = streamText({
           system: `You manage the user's Backlog (Strategy) and Stream (Execution).
-          
+
+[SYSTEM CONTEXT]
+Today is: ${new Date().toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })}
+ISO Time: ${new Date().toISOString()}
+
+CURRENT APPLICATION STATE:
+Backlog (Unscheduled Tasks): ${JSON.stringify(this.state.backlog || [], null, 2)}
+Stream (Scheduled Blocks): ${JSON.stringify(this.state.stream || [], null, 2)}
+[/SYSTEM CONTEXT]
+
 
 CRITICAL INSTRUCTIONS:
 1. You are a HEADLESS AGENT. Do NOT rely on conversational text.
