@@ -7,7 +7,7 @@
   "durable_objects": {
     "bindings": [
       {
-        "name": "Chat",
+        "name": "chat",
         "class_name": "Chat",
       },
     ],

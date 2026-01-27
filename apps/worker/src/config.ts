@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export interface Env {
   AI: any;
-  Chat: any;
+  chat: any;
 }
 
 const envSchema = z.object({
   AI: z.any(),
-  Chat: z.any(),
+  chat: z.any(),
 });
 
 export function validateEnv(env: any): Env {

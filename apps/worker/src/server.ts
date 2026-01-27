@@ -37,13 +37,22 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     onFinish: StreamTextOnFinishCallback<ToolSet>,
     options?: { abortSignal?: AbortSignal },
   ) {
+    console.log("Processing chat message...");
     const ai = createWorkersAI({ binding: this.env.AI });
     const model = ai("@cf/meta/llama-3-8b-instruct");
+    console.log("Model initialized:", model.modelId);
 
     // Collect all tools, including MCP tools
+    let mcpTools = {};
+    try {
+      mcpTools = this.mcp.getAITools();
+    } catch (e) {
+      console.warn("Failed to get MCP tools:", e);
+    }
+
     const allTools = {
       ...tools,
-      ...this.mcp.getAITools(),
+      ...mcpTools,
     };
 
     const stream = createUIMessageStream({

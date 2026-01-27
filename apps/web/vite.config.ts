@@ -14,7 +14,10 @@ export default defineConfig({
   server: {
     proxy: {
       "/check-open-ai-key": "http://localhost:8787",
-      "/agents": "http://localhost:8787",
+      "/agents": {
+        target: "http://localhost:8787",
+        ws: true,
+      },
     },
   },
 });
