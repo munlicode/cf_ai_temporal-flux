@@ -16,14 +16,16 @@ import {
 import { createWorkersAI } from "workers-ai-provider";
 import { processToolCalls, cleanupMessages } from "./utils";
 import { tools, executions } from "./tools";
+import { validateEnv, type Env } from "./config";
+import type { FluxState } from "@flux/shared";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
  */
-export class Chat extends AIChatAgent<any> {
-  env: any;
+export class Chat extends AIChatAgent<Env, FluxState> {
+  env: Env;
 
-  constructor(state: any, env: any) {
+  constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     this.env = env;
   }
@@ -109,10 +111,34 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
  */
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
-    return (
-      // Route the request to our agent or return 404 if not found
-      (await routeAgentRequest(request, env)) ||
-      new Response("Not found", { status: 404 })
-    );
+    try {
+      const validatedEnv = validateEnv(env);
+      const response = await routeAgentRequest(request, validatedEnv);
+
+      if (response) return response;
+
+      return new Response("Not found", { status: 404 });
+    } catch (error) {
+      console.error("Worker Error:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        url: request.url,
+        method: request.method,
+      });
+
+      return new Response(
+        JSON.stringify({
+          error: "Internal Server Error",
+          message:
+            error instanceof Error
+              ? error.message
+              : "An unexpected error occurred",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
   },
 } satisfies ExportedHandler<Env>;

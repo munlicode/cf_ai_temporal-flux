@@ -13,7 +13,8 @@
     "@cloudflare/ai-chat": "^0.0.4",
     "agents": "^0.3.3",
     "ai": "^6.0.5",
-    "workers-ai-provider": "^3.0.2"
+    "workers-ai-provider": "^3.0.2",
+    "@flux/shared": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251231.0",

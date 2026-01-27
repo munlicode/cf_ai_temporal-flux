@@ -7,7 +7,7 @@ import type {
   ToolCallOptions,
 } from "ai";
 import { convertToModelMessages, isStaticToolUIPart } from "ai";
-import { APPROVAL } from "./shared";
+import { APPROVAL } from "@flux/shared";
 
 function isValidToolName<K extends PropertyKey, T extends object>(
   key: K,

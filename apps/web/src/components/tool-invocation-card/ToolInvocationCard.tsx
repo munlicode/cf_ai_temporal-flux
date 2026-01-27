@@ -3,14 +3,14 @@ import type { ToolUIPart } from "ai";
 import { RobotIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
-import { APPROVAL } from "@/shared";
+import { APPROVAL } from "@flux/shared";
 
 interface ToolResultWithContent {
   content: Array<{ type: string; text: string }>;
 }
 
 function isToolResultWithContent(
-  result: unknown
+  result: unknown,
 ): result is ToolResultWithContent {
   return (
     typeof result === "object" &&
@@ -26,7 +26,7 @@ interface ToolInvocationCardProps {
   needsConfirmation: boolean;
   onSubmit: ({
     toolCallId,
-    result
+    result,
   }: {
     toolCallId: string;
     result: string;
@@ -38,7 +38,7 @@ export function ToolInvocationCard({
   toolUIPart,
   toolCallId,
   needsConfirmation,
-  onSubmit
+  onSubmit,
   // addToolResult
 }: ToolInvocationCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -120,7 +120,7 @@ export function ToolInvocationCard({
                           const lines = item.text.split("\n").filter(Boolean);
                           return lines
                             .map(
-                              (line: string) => `- ${line.replace("\n~ ", "")}`
+                              (line: string) => `- ${line.replace("\n~ ", "")}`,
                             )
                             .join("\n");
                         }

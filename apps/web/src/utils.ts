@@ -4,14 +4,14 @@ import type {
   UIMessage,
   UIMessageStreamWriter,
   ToolSet,
-  ToolCallOptions
+  ToolCallOptions,
 } from "ai";
 import { convertToModelMessages, isStaticToolUIPart } from "ai";
-import { APPROVAL } from "./shared";
+import { APPROVAL } from "@flux/shared";
 
 function isValidToolName<K extends PropertyKey, T extends object>(
   key: K,
-  obj: T
+  obj: T,
 ): key is K & keyof T {
   return key in obj;
 }
@@ -22,7 +22,7 @@ function isValidToolName<K extends PropertyKey, T extends object>(
 export async function processToolCalls<Tools extends ToolSet>({
   dataStream,
   messages,
-  executions
+  executions,
 }: {
   tools: Tools; // used for type inference
   dataStream: UIMessageStreamWriter;
@@ -46,7 +46,7 @@ export async function processToolCalls<Tools extends ToolSet>({
 
           const toolName = part.type.replace(
             "tool-",
-            ""
+            "",
           ) as keyof typeof executions;
 
           // Only process tools that require confirmation (are in executions object) and are in 'input-available' state
@@ -65,7 +65,7 @@ export async function processToolCalls<Tools extends ToolSet>({
             if (toolInstance) {
               result = await toolInstance(part.input, {
                 messages: await convertToModelMessages(messages),
-                toolCallId: part.toolCallId
+                toolCallId: part.toolCallId,
               });
             } else {
               result = "Error: No execute function found on tool";
@@ -81,19 +81,19 @@ export async function processToolCalls<Tools extends ToolSet>({
           dataStream.write({
             type: "tool-output-available",
             toolCallId: part.toolCallId,
-            output: result
+            output: result,
           });
 
           // Return updated tool part with the actual result.
           return {
             ...part,
-            output: result
+            output: result,
           };
-        })
+        }),
       );
 
       return { ...message, parts: processedParts };
-    })
+    }),
   );
 
   return processedMessages;

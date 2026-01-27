@@ -25,7 +25,8 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "streamdown": "^1.6.10",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "@flux/shared": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
