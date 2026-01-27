@@ -9,7 +9,6 @@
     "cf-typegen": "wrangler types --env-interface Env"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.2",
     "@cloudflare/ai-chat": "^0.0.4",
     "agents": "^0.3.3",
     "ai": "^6.0.5",
