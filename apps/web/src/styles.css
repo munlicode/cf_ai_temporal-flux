@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @source "../node_modules/streamdown/dist/index.js";
 
+body {
+  @apply bg-ob-base-200 text-ob-base-300 transition-colors duration-300 antialiased selection:bg-brand-500/20;
+  background-image:
+    radial-gradient(
+      circle at 0% 0%,
+      oklch(0.7 0.1 45 / 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      oklch(0.7 0.1 230 / 0.03) 0%,
+      transparent 50%
+    );
+}
+
 /* Markdown Table Styling (Tailwind @apply) */
 .markdown-body table {
   @apply w-full border-collapse my-4 text-[0.95em];
@@ -16,7 +31,7 @@
   @apply dark:text-neutral-300;
 }
 .markdown-body tr:nth-child(even) {
-  @apply bg-neutral-50 dark:bg-neutral-850;
+  @apply bg-neutral-50 dark:bg-ob-base-300;
 }
 
 /* Custom variants */
@@ -29,18 +44,15 @@
 /* Tailwind config */
 @theme {
   /* Type */
-  --text-xs: 10px;
-  --text-xs--line-height: calc(1 / 0.5);
-
-  --text-sm: 12px;
-  --text-sm--line-height: calc(1 / 0.75);
-
-  --text-base: 14px;
-  --text-base--line-height: calc(1.25 / 0.875);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
 
   /* Easings & transitions */
   --ease-bounce: cubic-bezier(0.2, 0, 0, 1.5);
-  --default-transition-duration: 100ms /* snappier than default 150ms */;
+  --default-transition-duration: 150ms;
 
   /* Animation */
   --animate-refresh: refresh 0.5s ease-in-out infinite;
@@ -49,33 +61,24 @@
   --color-black: #000;
   --color-white: #fff;
 
-  --color-neutral-50: oklch(0.985 0 0);
+  /* Premium OKLCH Palette */
+  --color-neutral-50: oklch(0.99 0 0);
   --color-neutral-100: oklch(0.97 0 0);
-  --color-neutral-150: oklch(0.96 0 0) /*new */;
-  --color-neutral-200: oklch(0.922 0 0);
-  --color-neutral-250: oklch(0.9 0 0) /* new */;
-  --color-neutral-300: oklch(0.87 0 0);
-  --color-neutral-400: oklch(0.708 0 0);
-  --color-neutral-450: oklch(0.62 0 0) /* new */;
-  --color-neutral-500: oklch(0.556 0 0);
-  --color-neutral-600: oklch(0.439 0 0);
-  --color-neutral-700: oklch(0.371 0 0);
-  --color-neutral-750: oklch(0.31 0 0) /* new */;
-  --color-neutral-800: oklch(0.269 0 0);
-  --color-neutral-850: oklch(0.23 0 0) /* new */;
-  --color-neutral-900: oklch(0.205 0 0);
-  --color-neutral-925: oklch(0.175 0 0) /* new */;
-  --color-neutral-950: oklch(0.145 0 0);
+  --color-neutral-200: oklch(0.94 0 0);
+  --color-neutral-300: oklch(0.91 0 0);
+  --color-neutral-400: oklch(0.85 0 0);
+  --color-neutral-500: oklch(0.65 0 0);
+  --color-neutral-600: oklch(0.45 0 0);
+  --color-neutral-700: oklch(0.35 0 0);
+  --color-neutral-800: oklch(0.25 0 0);
+  --color-neutral-900: oklch(0.15 0 0);
+  --color-neutral-950: oklch(0.1 0 0);
 
-  --color-red-650: oklch(0.55 0.238 27.4);
-  --color-red-750: oklch(0.46 0.195 27.2);
+  /* Brand Colors (Vibrant Orange) */
+  --color-brand-500: oklch(0.7 0.19 45);
+  --color-brand-600: oklch(0.62 0.17 45);
 
-  --color-blue-400: oklch(0.707 0.165 254.624);
-  --color-blue-800: oklch(0.424 0.199 265.638);
-
-  /* Component colors */
-
-  /* Base colors */
+  /* Component colors - Light mode */
   --color-ob-base-100: var(--color-white);
   --color-ob-base-200: var(--color-neutral-50);
   --color-ob-base-300: var(--color-neutral-100);
@@ -84,46 +87,43 @@
   --color-ob-base-1000: var(--color-neutral-900);
 
   --color-ob-border: var(--color-neutral-200);
-  --color-ob-border-active: var(--color-neutral-400);
+  --color-ob-border-active: var(--color-neutral-300);
 
   /* Text colors */
-  --text-color-ob-base-100: var(--color-neutral-500);
+  --text-color-ob-base-100: var(--color-neutral-400);
   --text-color-ob-base-200: var(--color-neutral-600);
   --text-color-ob-base-300: var(--color-neutral-900);
-  --text-color-ob-destructive: var(--color-red-600);
+  --text-color-ob-destructive: oklch(0.6 0.2 25);
   --text-color-ob-inverted: var(--color-white);
 
   /* ob-btn */
-  --color-ob-btn-primary-bg: var(--color-neutral-750);
-  --color-ob-btn-primary-bg-hover: var(--color-neutral-850);
-  --color-ob-btn-primary-border: var(--color-neutral-500);
-  --color-ob-btn-primary-border-hover: var(--color-neutral-600);
+  --color-ob-btn-primary-bg: var(--color-brand-500);
+  --color-ob-btn-primary-bg-hover: var(--color-brand-600);
+  --color-ob-btn-primary-border: var(--color-brand-600);
+  --color-ob-btn-primary-border-hover: var(--color-brand-600);
 
   --color-ob-btn-secondary-bg: var(--color-white);
   --color-ob-btn-secondary-bg-hover: var(--color-neutral-50);
   --color-ob-btn-secondary-border: var(--color-neutral-200);
   --color-ob-btn-secondary-border-hover: var(--color-neutral-300);
 
-  --color-ob-btn-ghost-bg-hover: var(--color-neutral-150);
+  --color-ob-btn-ghost-bg-hover: var(--color-neutral-100);
 
-  --color-ob-btn-destructive-bg: var(--color-red-600);
-  --color-ob-btn-destructive-bg-hover: var(--color-red-650);
-  --color-ob-btn-destructive-border: var(--color-red-400);
-  --color-ob-btn-destructive-border-hover: var(--color-red-500);
+  --color-ob-btn-destructive-bg: oklch(0.6 0.2 25);
+  --color-ob-btn-destructive-bg-hover: oklch(0.55 0.21 25.5);
+  --color-ob-btn-destructive-border: oklch(0.5 0.22 26);
+  --color-ob-btn-destructive-border-hover: oklch(0.45 0.23 26.5);
 
-  /* Focus colors */
-  --color-ob-focus: var(--color-blue-400);
+  --color-ob-focus: oklch(0.7 0.1 230);
 }
 
 .dark {
-  /* Component colors */
-
-  /* Base colors */
+  /* Component colors - Dark mode */
   --color-ob-base-100: var(--color-neutral-950);
-  --color-ob-base-200: var(--color-neutral-900);
-  --color-ob-base-300: var(--color-neutral-850);
-  --color-ob-base-400: var(--color-neutral-800);
-  --color-ob-base-500: var(--color-neutral-750);
+  --color-ob-base-200: var(--color-black);
+  --color-ob-base-300: var(--color-neutral-900);
+  --color-ob-base-400: var(--color-neutral-850);
+  --color-ob-base-500: var(--color-neutral-800);
   --color-ob-base-1000: var(--color-neutral-50);
 
   --color-ob-border: var(--color-neutral-800);
@@ -133,14 +133,14 @@
   --text-color-ob-base-100: var(--color-neutral-500);
   --text-color-ob-base-200: var(--color-neutral-400);
   --text-color-ob-base-300: var(--color-neutral-50);
-  --text-color-ob-destructive: var(--color-red-400);
-  --text-color-ob-inverted: var(--color-neutral-900);
+  --text-color-ob-destructive: oklch(0.7 0.2 25);
+  --text-color-ob-inverted: var(--color-black);
 
   /* ob-btn */
-  --color-ob-btn-primary-bg: var(--color-neutral-300);
-  --color-ob-btn-primary-bg-hover: var(--color-neutral-250);
-  --color-ob-btn-primary-border: var(--color-neutral-100);
-  --color-ob-btn-primary-border-hover: var(--color-white);
+  --color-ob-btn-primary-bg: var(--color-brand-500);
+  --color-ob-btn-primary-bg-hover: var(--color-brand-600);
+  --color-ob-btn-primary-border: var(--color-brand-600);
+  --color-ob-btn-primary-border-hover: var(--color-brand-600);
 
   --color-ob-btn-secondary-bg: var(--color-neutral-900);
   --color-ob-btn-secondary-bg-hover: var(--color-neutral-850);
@@ -149,13 +149,12 @@
 
   --color-ob-btn-ghost-bg-hover: var(--color-neutral-850);
 
-  --color-ob-btn-destructive-bg: var(--color-red-800);
-  --color-ob-btn-destructive-bg-hover: var(--color-red-750);
-  --color-ob-btn-destructive-border: var(--color-red-700);
-  --color-ob-btn-destructive-border-hover: var(--color-red-600);
+  --color-ob-btn-destructive-bg: oklch(0.45 0.2 25);
+  --color-ob-btn-destructive-bg-hover: oklch(0.4 0.21 25.5);
+  --color-ob-btn-destructive-border: oklch(0.35 0.22 26);
+  --color-ob-btn-destructive-border-hover: oklch(0.3 0.23 26.5);
 
-  /* Focus colors */
-  --color-ob-focus: var(--color-blue-800);
+  --color-ob-focus: oklch(0.4 0.1 230);
 }
 
 .btn {

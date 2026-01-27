@@ -44,26 +44,28 @@ export function ToolInvocationCard({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <Card className="p-4 my-3 w-full max-w-[500px] rounded-md bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
+    <Card className="p-5 my-4 w-full max-w-[500px] rounded-2xl bg-ob-base-200 border-none shadow-sm overflow-hidden">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center gap-2 cursor-pointer"
       >
         <div
-          className={`${needsConfirmation ? "bg-[#F48120]/10" : "bg-[#F48120]/5"} p-1.5 rounded-full shrink-0`}
+          className={`${needsConfirmation ? "bg-brand-500/20" : "bg-brand-500/10"} p-2 rounded-xl shrink-0`}
         >
-          <RobotIcon size={16} className="text-[#F48120]" />
+          <RobotIcon size={18} className="text-brand-500" />
         </div>
         <h4 className="font-medium flex items-center gap-2 flex-1 text-left">
           {toolUIPart.type}
           {!needsConfirmation && toolUIPart.state === "output-available" && (
-            <span className="text-xs text-[#F48120]/70">✓ Completed</span>
+            <span className="text-xs text-brand-500/80 font-semibold px-2 py-0.5 bg-brand-500/10 rounded-full">
+              ✓ Completed
+            </span>
           )}
         </h4>
         <CaretDownIcon
           size={16}
-          className={`text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+          className={`text-ob-base-200 transition-transform ${isExpanded ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -75,10 +77,10 @@ export function ToolInvocationCard({
           style={{ maxHeight: isExpanded ? "180px" : "0px" }}
         >
           <div className="mb-3">
-            <h5 className="text-xs font-medium mb-1 text-muted-foreground">
-              Arguments:
+            <h5 className="text-xs font-bold mb-2 text-ob-base-200 uppercase tracking-wider">
+              Arguments
             </h5>
-            <pre className="bg-background/80 p-2 rounded-md text-xs overflow-auto whitespace-pre-wrap wrap-break-word max-w-[450px]">
+            <pre className="bg-ob-base-300 p-3 rounded-xl text-xs overflow-auto whitespace-pre-wrap wrap-break-word font-mono border border-ob-border">
               {JSON.stringify(toolUIPart.input, null, 2)}
             </pre>
           </div>
@@ -103,11 +105,11 @@ export function ToolInvocationCard({
           )}
 
           {!needsConfirmation && toolUIPart.state === "output-available" && (
-            <div className="mt-3 border-t border-[#F48120]/10 pt-3">
-              <h5 className="text-xs font-medium mb-1 text-muted-foreground">
-                Result:
+            <div className="mt-4 border-t border-ob-border pt-4">
+              <h5 className="text-xs font-bold mb-2 text-ob-base-200 uppercase tracking-wider">
+                Result
               </h5>
-              <pre className="bg-background/80 p-2 rounded-md text-xs overflow-auto whitespace-pre-wrap wrap-break-word max-w-[450px]">
+              <pre className="bg-ob-base-300 p-3 rounded-xl text-xs overflow-auto whitespace-pre-wrap wrap-break-word font-mono border border-ob-border">
                 {(() => {
                   const result = toolUIPart.output;
                   if (isToolResultWithContent(result)) {

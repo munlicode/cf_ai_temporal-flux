@@ -136,9 +136,9 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-screen w-full p-4 flex justify-center items-center bg-fixed overflow-hidden">
-      <div className="h-[calc(100vh-2rem)] w-full mx-auto max-w-lg flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
-        <div className="px-4 py-3 border-b border-neutral-300 dark:border-neutral-800 flex items-center gap-3 sticky top-0 z-10">
+    <div className="h-screen w-full p-4 md:p-8 flex justify-center items-center bg-ob-base-200">
+      <div className="h-full w-full mx-auto max-w-5xl flex flex-col shadow-2xl rounded-2xl overflow-hidden relative border border-ob-border bg-ob-base-100">
+        <div className="px-6 py-4 border-b border-ob-border flex items-center gap-4 sticky top-0 z-20 bg-ob-base-100/80 backdrop-blur-md">
           <div className="flex items-center justify-center h-8 w-8">
             <svg
               width="28px"
@@ -195,23 +195,23 @@ export default function Chat() {
         <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-10rem)]">
           {agentMessages.length === 0 && (
             <div className="h-full flex items-center justify-center">
-              <Card className="p-6 max-w-md mx-auto bg-neutral-100 dark:bg-neutral-900">
-                <div className="text-center space-y-4">
-                  <div className="bg-[#F48120]/10 text-[#F48120] rounded-full p-3 inline-flex">
+              <Card className="p-8 max-w-md mx-auto bg-ob-base-300 border-none shadow-inner">
+                <div className="text-center space-y-6">
+                  <div className="bg-brand-500/10 text-brand-500 rounded-2xl p-4 inline-flex shadow-sm">
                     <RobotIcon size={24} />
                   </div>
                   <h3 className="font-semibold text-lg">Welcome to AI Chat</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-ob-base-200 text-sm">
                     Start a conversation with your AI assistant. Try asking
                     about:
                   </p>
-                  <ul className="text-sm text-left space-y-2">
-                    <li className="flex items-center gap-2">
-                      <span className="text-[#F48120]">•</span>
+                  <ul className="text-sm text-left space-y-3">
+                    <li className="flex items-center gap-3">
+                      <span className="text-brand-500 font-bold">•</span>
                       <span>Weather information for any city</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-[#F48120]">•</span>
+                    <li className="flex items-center gap-3">
+                      <span className="text-brand-500 font-bold">•</span>
                       <span>Local time in different locations</span>
                     </li>
                   </ul>
@@ -254,13 +254,13 @@ export default function Chat() {
                               // biome-ignore lint/suspicious/noArrayIndexKey: immutable index
                               <div key={i}>
                                 <Card
-                                  className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${
+                                  className={`p-4 rounded-2xl bg-ob-base-300 shadow-sm ${
                                     isUser
-                                      ? "rounded-br-none"
-                                      : "rounded-bl-none border-assistant-border"
+                                      ? "rounded-br-none border-brand-500/20"
+                                      : "rounded-bl-none border-ob-border"
                                   } ${
                                     part.text.startsWith("scheduled message")
-                                      ? "border-accent/50"
+                                      ? "border-brand-500/50"
                                       : ""
                                   } relative`}
                                 >
@@ -280,7 +280,7 @@ export default function Chat() {
                                   />
                                 </Card>
                                 <p
-                                  className={`text-xs text-muted-foreground mt-1 ${
+                                  className={`text-xs text-ob-base-200 mt-2 px-1 ${
                                     isUser ? "text-right" : "text-left"
                                   }`}
                                 >
@@ -352,7 +352,7 @@ export default function Chat() {
             });
             setTextareaHeight("auto"); // Reset height after submission
           }}
-          className="p-3 bg-neutral-50 absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900"
+          className="p-4 md:p-6 bg-ob-base-100 absolute bottom-0 left-0 right-0 z-10 border-t border-ob-border backdrop-blur-lg bg-ob-base-100/90"
         >
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
@@ -363,7 +363,7 @@ export default function Chat() {
                     ? "Please respond to the tool confirmation above..."
                     : "Send a message..."
                 }
-                className="flex w-full border border-neutral-200 dark:border-neutral-700 px-3 py-2  ring-offset-background placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-700 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl text-base! pb-10 dark:bg-neutral-900"
+                className="flex w-full border border-ob-border px-4 py-3 placeholder:text-ob-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm min-h-[48px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl text-base! pb-12 bg-ob-base-200"
                 value={agentInput}
                 onChange={(e) => {
                   handleAgentInputChange(e);
