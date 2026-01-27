@@ -33,3 +33,9 @@ This file logs significant AI prompts used to generate core logic, architecture,
 **Context:** Following up on the production grade roadmap to improve architectural integrity.
 **Prompt:** `lets do those.`
 **Outcome:** Created `@flux/shared` package to centralize constants and types. Migrated `APPROVAL` constants and defined core domain interfaces (`TaskItem`, `StreamBlock`, `FluxState`) for single-source-of-truth across the monorepo.
+
+### Refining UI & Cleaning Stale Dependencies
+
+**Context:** The app had broken styling, a mobile-only fixed layout that didn't scale, and the backend was crashing due to a mandatory but missing `OPENAI_API_KEY`.
+**Prompt:** `Remove stale vars and packges(ai-sdk/openai) and update styling`
+**Outcome:** Removed unused `@ai-sdk/openai` package and mandatory `OPENAI_API_KEY` requirement from the worker. Revamped the design system with a premium OKLCH-based color palette, vibrant orange accents, a wider desktop layout (max-w-5xl), and improved contrast/responsive elements. Added custom scrollbars and rounded UI elements for a modern feel.

@@ -228,10 +228,11 @@ export default function Chat() {
             return (
               <div key={m.id}>
                 {showDebug && (
-                  <pre className="text-xs text-muted-foreground overflow-scroll">
+                  <pre className="text-[10px] text-muted-foreground overflow-x-auto bg-ob-base-200/50 p-2 rounded-lg border border-ob-border mb-2 max-w-full">
                     {JSON.stringify(m, null, 2)}
                   </pre>
                 )}
+
                 <div
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
@@ -363,7 +364,7 @@ export default function Chat() {
                     ? "Please respond to the tool confirmation above..."
                     : "Send a message..."
                 }
-                className="flex w-full border border-ob-border px-4 py-3 placeholder:text-ob-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm min-h-[48px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl text-base! pb-12 bg-ob-base-200"
+                className="flex w-full border border-ob-border px-4 py-3 placeholder:text-ob-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm min-h-[48px] max-h-[calc(75dvh)] overflow-y-auto resize-none rounded-2xl text-base! pb-12 bg-ob-base-200"
                 value={agentInput}
                 onChange={(e) => {
                   handleAgentInputChange(e);

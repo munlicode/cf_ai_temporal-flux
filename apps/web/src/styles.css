@@ -16,6 +16,54 @@ body {
     );
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ob-base-200);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 20px;
+  border: 2px solid var(--color-ob-base-200);
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+.dark::-webkit-scrollbar-track {
+  background: var(--color-ob-base-200);
+}
+
+.dark::-webkit-scrollbar-thumb,
+.dark *::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-700);
+  border: 2px solid var(--color-ob-base-200);
+}
+
+.dark::-webkit-scrollbar-thumb:hover,
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-600);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-300) var(--color-ob-base-200);
+}
+
+.dark,
+.dark * {
+  scrollbar-color: var(--color-neutral-700) var(--color-ob-base-200);
+}
+
 /* Markdown Table Styling (Tailwind @apply) */
 .markdown-body table {
   @apply w-full border-collapse my-4 text-[0.95em];
