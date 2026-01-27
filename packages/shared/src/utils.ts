@@ -1,5 +1,3 @@
-// via https://github.com/vercel/ai/blob/main/examples/next-openai/app/api/use-chat-human-in-the-loop/utils.ts
-
 import type {
   UIMessage,
   UIMessageStreamWriter,
@@ -7,7 +5,7 @@ import type {
   ToolCallOptions,
 } from "ai";
 import { convertToModelMessages, isStaticToolUIPart } from "ai";
-import { APPROVAL } from "@flux/shared";
+import { APPROVAL } from "./index";
 
 function isValidToolName<K extends PropertyKey, T extends object>(
   key: K,

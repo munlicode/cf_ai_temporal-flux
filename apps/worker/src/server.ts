@@ -14,7 +14,7 @@ import {
   type ToolSet,
 } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
-import { processToolCalls, cleanupMessages } from "./utils";
+import { processToolCalls, cleanupMessages } from "@flux/shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
 import type { FluxState } from "@flux/shared";

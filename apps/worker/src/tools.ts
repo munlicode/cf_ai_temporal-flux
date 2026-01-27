@@ -1,42 +1,47 @@
-/**
- * Tool definitions for the AI chat agent
- * Tools can either require human confirmation or execute automatically
- */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 
 import type { Chat } from "./server";
 import { getCurrentAgent } from "agents";
 import { scheduleSchema } from "agents/schedule";
+import {
+  getWeatherInformationSchema,
+  getLocalTimeSchema,
+  scheduleTaskSchema,
+  getScheduledTasksSchema,
+  cancelScheduledTaskSchema,
+} from "@flux/shared";
 
 /**
  * Weather information tool that requires human confirmation
- * When invoked, this will present a confirmation dialog to the user
  */
 const getWeatherInformation = tool({
-  description: "show the weather in a given city to the user",
-  parameters: z.object({ city: z.string() }),
-  // Omitting execute function makes this tool require human confirmation
+  description: getWeatherInformationSchema.description,
+  inputSchema: getWeatherInformationSchema.parameters,
 });
 
 /**
  * Local time tool that executes automatically
- * Since it includes an execute function, it will run without user confirmation
- * This is suitable for low-risk operations that don't need oversight
  */
 const getLocalTime = tool({
-  description: "get the local time for a specified location",
-  parameters: z.object({ location: z.string() }),
-  execute: async ({ location }) => {
+  description: getLocalTimeSchema.description,
+  inputSchema: getLocalTimeSchema.parameters,
+  execute: async ({ location }: { location: string }) => {
     console.log(`Getting local time for ${location}`);
     return "10am";
   },
 });
 
 const scheduleTask = tool({
-  description: "A tool to schedule a task to be executed at a later time",
-  parameters: scheduleSchema,
-  execute: async ({ when, description }) => {
+  description: scheduleTaskSchema.description,
+  inputSchema: scheduleSchema, // override with specific worker schema
+  execute: async ({
+    when,
+    description,
+  }: {
+    when: any;
+    description: string;
+  }) => {
     // we can now read the agent context from the ALS store
     const { agent } = getCurrentAgent<Chat>();
 
@@ -66,11 +71,10 @@ const scheduleTask = tool({
 
 /**
  * Tool to list all scheduled tasks
- * This executes automatically without requiring human confirmation
  */
 const getScheduledTasks = tool({
-  description: "List all tasks that have been scheduled",
-  parameters: z.object({}),
+  description: getScheduledTasksSchema.description,
+  inputSchema: getScheduledTasksSchema.parameters,
   execute: async () => {
     const { agent } = getCurrentAgent<Chat>();
 
@@ -89,14 +93,11 @@ const getScheduledTasks = tool({
 
 /**
  * Tool to cancel a scheduled task by its ID
- * This executes automatically without requiring human confirmation
  */
 const cancelScheduledTask = tool({
-  description: "Cancel a scheduled task using its ID",
-  parameters: z.object({
-    taskId: z.string().describe("The ID of the task to cancel"),
-  }),
-  execute: async ({ taskId }) => {
+  description: cancelScheduledTaskSchema.description,
+  inputSchema: cancelScheduledTaskSchema.parameters,
+  execute: async ({ taskId }: { taskId: string }) => {
     const { agent } = getCurrentAgent<Chat>();
     try {
       await agent!.cancelSchedule(taskId);
@@ -110,7 +111,6 @@ const cancelScheduledTask = tool({
 
 /**
  * Export all available tools
- * These will be provided to the AI model to describe available capabilities
  */
 export const tools = {
   getWeatherInformation,
@@ -122,8 +122,6 @@ export const tools = {
 
 /**
  * Implementation of confirmation-required tools
- * This object contains the actual logic for tools that need human approval
- * Each function here corresponds to a tool above that doesn't have an execute function
  */
 export const executions = {
   getWeatherInformation: async ({ city }: { city: string }) => {

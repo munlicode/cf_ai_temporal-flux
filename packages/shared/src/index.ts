@@ -50,3 +50,6 @@ export interface FluxState {
   stream: StreamBlock[];
   events: EventLog[];
 }
+
+export * from "./utils";
+export * from "./tools";
