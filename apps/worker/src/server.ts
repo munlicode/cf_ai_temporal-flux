@@ -1,5 +1,4 @@
 import { routeAgentRequest, type Schedule } from "agents";
-import { getSchedulePrompt } from "agents/schedule";
 // @ts-ignore
 import type { DurableObjectState, Ai } from "@cloudflare/workers-types";
 import { AIChatAgent } from "@cloudflare/ai-chat";
@@ -18,6 +17,7 @@ import { processToolCalls, cleanupMessages } from "@flux/shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
 import type { FluxState } from "@flux/shared";
+import { getSchedulePrompt } from "agents/schedule";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -28,6 +28,19 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     this.env = env;
+    this.initialState = {
+      backlog: [
+        {
+          id: "1",
+          title: "Explore Flux",
+          description: "Check out the new backlog view",
+          priority: "high",
+          tags: ["onboarding"],
+        },
+      ],
+      stream: [],
+      events: [],
+    };
   }
 
   /**
@@ -39,7 +52,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   ) {
     console.log("Processing chat message...");
     const ai = createWorkersAI({ binding: this.env.AI });
-    const model = ai("@cf/meta/llama-3-8b-instruct");
+    const model = ai("@cf/meta/llama-3.1-8b-instruct");
     console.log("Model initialized:", model.modelId);
 
     // Collect all tools, including MCP tools
@@ -70,11 +83,24 @@ export class Chat extends AIChatAgent<Env, FluxState> {
         });
 
         const result = streamText({
-          system: `You are a helpful assistant that can do various tasks... 
+          system: `You manage the user's Backlog (Strategy) and Stream (Execution).
+          
 
-${getSchedulePrompt({ date: new Date() })}
+CRITICAL INSTRUCTIONS:
+1. You are a HEADLESS AGENT. Do NOT rely on conversational text.
+2. You MUST use tools to modify state. If you don't call a tool, nothing happens.
+3. If the user mentions a specific time (e.g., "at 3pm", "tomorrow morning"), IMMEDIATELY use 'scheduleBlock'.
+4. If the user has a general task without a time (e.g., "I need to buy milk"), use 'addToBacklog'.
+5. For updates or deletions, use 'updateTask' or 'deleteTask'.
+6. Do NOT ask for confirmation unless the request is genuinely unintelligible. Assume the user wants action.
+7. Your response should be EITHER a tool call OR a very brief confirmation (e.g., "Done.").
 
-If the user asks to schedule a task, use the schedule tool to schedule the task.
+Tools Available:
+- 'addToBacklog': For unassigned tasks.
+- 'updateTask': Modify existing tasks.
+- 'deleteTask': Remove tasks and their scheduled blocks.
+- 'scheduleBlock': For tasks with a time.
+- 'getLocalTime': If you need to resolve relative times like "tomorrow".
 `,
 
           messages: await convertToModelMessages(processedMessages),

@@ -6,7 +6,7 @@ trigger: always_on
 
 ## 1. The Mission & Philosophy
 
-You are working on **Flux** (`cf_ai_temporal-flux`), a "Human Enablement" engine designed to replace rigid calendars with a fluid, antifragile system.
+You are working on engine designed to replace rigid calendars with a fluid, antifragile system.
 
 - **Core Philosophy:** Traditional calendars are "Storage Bins" for dates. Flux is a "Flow Control System." We acknowledge that while humans plan in months (Strategy), we live in hours (Execution).
 - **The "Why":** To build an "External Prefrontal Cortex" that handles the chaos of daily life (oversleeping, unexpected bugs, energy dips) by dynamically re-flowing the schedule via AI, rather than breaking it.
@@ -53,7 +53,3 @@ We do not overwrite state. We append events to allow for "Time Travel/Undo."
 2.  **Transparency:** We must maintain a `PROMPTS.md` file. If you (the AI) generate a significant chunk of logic, remind me to log the prompt used.
 3.  **Type Safety:** Strict TypeScript everywhere. Shared types between Worker and Frontend.
 4.  **Performance:** "Internet Scale" thinking. Minimize round-trips. Use the Edge effectively.
-
-## 6. Current Task Focus
-
-We are currently initializing the **Monorepo Structure** and setting up the **Durable Object** connection. The goal is to get a "Magic Session" running where a user visits a URL (UUID) and connects to a specific Durable Object instance via WebSocket.

@@ -1,5 +1,4 @@
 import { tool, type ToolSet } from "ai";
-import { z } from "zod";
 
 import type { Chat } from "./server";
 import { getCurrentAgent } from "agents";
@@ -10,6 +9,11 @@ import {
   scheduleTaskSchema,
   getScheduledTasksSchema,
   cancelScheduledTaskSchema,
+  addToBacklogSchema,
+  scheduleBlockSchema,
+  updateTaskSchema,
+  deleteTaskSchema,
+  type FluxState,
 } from "@flux/shared";
 
 /**
@@ -29,6 +33,182 @@ const getLocalTime = tool({
   execute: async ({ location }: { location: string }) => {
     console.log(`Getting local time for ${location}`);
     return "10am";
+  },
+});
+
+const addToBacklog = tool({
+  description: addToBacklogSchema.description,
+  inputSchema: addToBacklogSchema.parameters,
+  execute: async (task) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const newTask = {
+      id: crypto.randomUUID(),
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      tags: task.tags || [],
+    };
+
+    // Update state
+    const currentState = agent!.state;
+    agent!.setState({
+      ...currentState,
+      backlog: [...(currentState.backlog || []), newTask],
+      events: [
+        ...(currentState.events || []),
+        {
+          id: crypto.randomUUID(),
+          type: "TASK_CREATED",
+          payload: newTask,
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+
+    return `Added "${task.title}" to backlog.`;
+  },
+});
+
+const scheduleBlock = tool({
+  description: scheduleBlockSchema.description,
+  inputSchema: scheduleBlockSchema.parameters,
+  execute: async (block) => {
+    const { agent } = getCurrentAgent<Chat>();
+
+    // Helper to ensure full ISO string
+    const normalizeTime = (timeStr: string) => {
+      if (timeStr.includes("T")) return timeStr; // Already ISO
+      // Assuming HH:MM or HH:MM:SS format for today
+      const today = new Date().toISOString().split("T")[0];
+      return `${today}T${timeStr}`;
+    };
+
+    const startTime = normalizeTime(block.startTime);
+    const endTime = normalizeTime(block.endTime);
+
+    // Create ephemeral ID if no backlog task is provided
+    const taskId = block.taskId || crypto.randomUUID();
+
+    const newBlock = {
+      id: crypto.randomUUID(),
+      taskId,
+      startTime,
+      endTime,
+      status: "pending" as const,
+    };
+
+    // Update state
+    const currentState = agent!.state;
+
+    // If this is a new ad-hoc task (no taskId provided), add it to backlog implicitly
+    let newBacklog = currentState.backlog || [];
+    let newEvents = currentState.events || [];
+
+    // Check if task exists, if not create it
+    const taskExists = newBacklog.find((t) => t.id === taskId);
+    if (!taskExists) {
+      const newTask = {
+        id: taskId,
+        title: block.title,
+        priority: "medium" as const, // Default priority
+        tags: ["scheduled"],
+      };
+      newBacklog = [...newBacklog, newTask];
+      newEvents = [
+        ...newEvents,
+        {
+          id: crypto.randomUUID(),
+          type: "TASK_CREATED",
+          payload: newTask,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+    }
+
+    agent!.setState({
+      ...currentState,
+      backlog: newBacklog,
+      stream: [...(currentState.stream || []), newBlock],
+      events: [
+        ...newEvents,
+        {
+          id: crypto.randomUUID(),
+          type: "BLOCK_SCHEDULED",
+          payload: newBlock,
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+
+    return `Scheduled "${block.title}" from ${new Date(startTime).toLocaleTimeString()} to ${new Date(endTime).toLocaleTimeString()}.`;
+  },
+});
+
+const updateTask = tool({
+  description: updateTaskSchema.description,
+  inputSchema: updateTaskSchema.parameters,
+  execute: async ({ id, updates }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const currentState = agent!.state;
+
+    const backlog = currentState.backlog || [];
+    const taskIndex = backlog.findIndex((t) => t.id === id);
+
+    if (taskIndex === -1) {
+      return `Task with ID ${id} not found.`;
+    }
+
+    const updatedTask = { ...backlog[taskIndex], ...updates };
+    const newBacklog = [...backlog];
+    newBacklog[taskIndex] = updatedTask;
+
+    agent!.setState({
+      ...currentState,
+      backlog: newBacklog,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: crypto.randomUUID(),
+          type: "TASK_UPDATED",
+          payload: { id, updates },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    return `Updated task ${updatedTask.title}`;
+  },
+});
+
+const deleteTask = tool({
+  description: deleteTaskSchema.description,
+  inputSchema: deleteTaskSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const currentState = agent!.state;
+
+    // Remove from backlog
+    const backlog = currentState.backlog || [];
+    const newBacklog = backlog.filter((t) => t.id !== id);
+
+    // Remove from stream
+    const stream = currentState.stream || [];
+    const newStream = stream.filter((b) => b.taskId !== id);
+
+    agent!.setState({
+      ...currentState,
+      backlog: newBacklog,
+      stream: newStream,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: crypto.randomUUID(),
+          type: "TASK_DELETED",
+          payload: { id },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    return `Deleted task ${id} and associated blocks.`;
   },
 });
 
@@ -115,7 +295,11 @@ const cancelScheduledTask = tool({
 export const tools = {
   getWeatherInformation,
   getLocalTime,
-  scheduleTask,
+  addToBacklog,
+  scheduleBlock,
+  updateTask,
+  deleteTask,
+  // scheduleTask, // Disable old scheduler for now to avoid confusion
   getScheduledTasks,
   cancelScheduledTask,
 } satisfies ToolSet;

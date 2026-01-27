@@ -36,3 +36,54 @@ export const cancelScheduledTaskSchema = {
     taskId: z.string().describe("The ID of the task to cancel"),
   }),
 };
+
+export const addToBacklogSchema = {
+  description: "Add a task to the backlog (unassigned tasks)",
+  parameters: z.object({
+    title: z.string().describe("The title of the task"),
+    description: z
+      .string()
+      .optional()
+      .describe("Additional details about the task"),
+    priority: z.enum(["high", "medium", "low"]).default("medium"),
+    tags: z.array(z.string()).optional(),
+  }),
+};
+
+export const scheduleBlockSchema = {
+  description: "Schedule a task block on the timeline (Stream)",
+  parameters: z.object({
+    title: z.string().describe("The title of the task"),
+    taskId: z
+      .string()
+      .optional()
+      .describe("ID of an existing backlog task if applicable"),
+    startTime: z
+      .string()
+      .describe("ISO 8601 start time (e.g., 2024-01-27T20:00:00)"),
+    endTime: z.string().describe("ISO 8601 end time"),
+  }),
+};
+
+export const updateTaskSchema = {
+  description: "Update an existing task in the backlog",
+  parameters: z.object({
+    id: z.string().describe("The ID of the task to update"),
+    updates: z
+      .object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+        priority: z.enum(["high", "medium", "low"]).optional(),
+        tags: z.array(z.string()).optional(),
+      })
+      .describe("The fields to update"),
+  }),
+};
+
+export const deleteTaskSchema = {
+  description:
+    "Delete a task from the backlog and remove all its scheduled blocks",
+  parameters: z.object({
+    id: z.string().describe("The ID of the task to delete"),
+  }),
+};
