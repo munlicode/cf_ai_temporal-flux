@@ -11,12 +11,13 @@ export const Toggle = ({ onClick, size = "base", toggled }: ToggleProps) => {
     <button
       type="button"
       className={cn(
-        "ob-focus interactive dark:bg-neutral-750 bg-neutral-300 cursor-pointer rounded-full border border-transparent p-1 transition-colors hover:bg-neutral-400 dark:hover:bg-neutral-700",
+        "ob-focus interactive cursor-pointer rounded-full border border-transparent p-1 transition-colors",
+        "bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-750 dark:hover:bg-neutral-600",
         {
           "h-5.5 w-8.5": size === "sm",
           "h-6.5 w-10.5": size === "base",
           "h-7.5 w-12.5": size === "lg",
-          "dark:hover:bg-neutral-450 bg-neutral-700 hover:bg-neutral-600 dark:bg-neutral-700":
+          "bg-neutral-600 hover:bg-neutral-700 dark:bg-neutral-850 dark:hover:bg-neutral-700":
             toggled,
         },
       )}
