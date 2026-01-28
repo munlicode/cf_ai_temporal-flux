@@ -121,7 +121,8 @@ For production, you can set variables via the Cloudflare Dashboard.
 - Thank you for reading this far.
 - I thank Cloudflare for offering intern opportunity.
 - I thank life for everything.
-
+- I thank my family ヾ( ˃ᴗ˂ )◞ • *✰
+- Thank me 	(˵ ͡° ͜ʖ ͡°˵)
 ---
 
 _Built for the Cloudflare AI Challenge and high-speed project prototyping._
