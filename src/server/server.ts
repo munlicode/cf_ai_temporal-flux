@@ -16,8 +16,7 @@ import { createWorkersAI } from "workers-ai-provider";
 import { processToolCalls, cleanupMessages } from "../shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
-import type { FluxState } from "../shared";
-import { getSchedulePrompt } from "agents/schedule";
+import type { FluxState, StreamBlock } from "../shared";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -28,6 +27,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
+    console.log(`[Chat] Initializing new instance: ${state.id.toString()}`);
     this.env = env;
     this.id = state.id.toString();
     this.initialState = {
@@ -50,14 +50,89 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   /**
    * Method called by the ArchitectWorkflow to push results into the state
    */
-  async addTasksFromWorkflow(tasks: any[]) {
-    console.log(`Received ${tasks.length} tasks from workflow`);
+  /**
+   * Internal method to update state with new blocks and log the event
+   */
+  public scheduleBlocks(newBlocks: StreamBlock[], reason?: string) {
+    const currentState = this.state;
+    this.setState({
+      ...currentState,
+      stream: [...(currentState.stream || []), ...newBlocks],
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "BLOCK_SCHEDULED",
+          payload: newBlocks.length === 1 ? newBlocks[0] : newBlocks,
+          timestamp: new Date().toISOString(),
+          reason,
+        },
+      ],
+    });
+  }
 
+  /**
+   * Internal method to update an existing block
+   */
+  public updateBlockState(id: string, updates: Partial<StreamBlock>) {
+    const currentState = this.state;
+    const stream = currentState.stream || [];
+    const blockIndex = stream.findIndex((b) => b.id === id);
+
+    if (blockIndex === -1) return null;
+
+    const updatedBlock = { ...stream[blockIndex], ...updates };
+    const newStream = [...stream];
+    newStream[blockIndex] = updatedBlock;
+
+    this.setState({
+      ...currentState,
+      stream: newStream,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "BLOCK_UPDATED",
+          payload: { id, updates },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    return updatedBlock;
+  }
+
+  /**
+   * Internal method to delete a block
+   */
+  public deleteBlockState(id: string) {
+    const currentState = this.state;
+    const stream = currentState.stream || [];
+    const newStream = stream.filter((b) => b.id !== id);
+
+    this.setState({
+      ...currentState,
+      stream: newStream,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "BLOCK_DELETED",
+          payload: { id },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+  }
+
+  /**
+   * Method called by the ArchitectWorkflow to push results into the state
+   */
+  async addTasksFromWorkflow(tasks: any[]) {
     let lastEndTime = new Date();
     // Round to next 5 minute interval
     lastEndTime.setMinutes(Math.ceil(lastEndTime.getMinutes() / 5) * 5, 0, 0);
 
-    const newBlocks = tasks.map((t) => {
+    const newBlocks: StreamBlock[] = tasks.map((t) => {
       const duration = t.durationMinutes || 30;
       const startTime = new Date(lastEndTime.getTime() + 5 * 60000); // 5 min gap
       const endTime = new Date(startTime.getTime() + duration * 60000);
@@ -76,22 +151,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
       };
     });
 
-    const currentState = this.state;
-    this.setState({
-      ...currentState,
-      stream: [...(currentState.stream || []), ...newBlocks],
-      events: [
-        ...(currentState.events || []),
-        {
-          id: generateId(),
-          type: "BLOCK_SCHEDULED",
-          payload: newBlocks,
-          timestamp: new Date().toISOString(),
-          reason: "Architect workflow completed and auto-scheduled",
-        },
-      ],
-    });
-
+    this.scheduleBlocks(newBlocks, "Architect workflow completed");
     return { success: true };
   }
 
@@ -102,17 +162,18 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     onFinish: StreamTextOnFinishCallback<ToolSet>,
     options?: { abortSignal?: AbortSignal },
   ) {
-    console.log("Processing chat message...");
     const ai = createWorkersAI({ binding: this.env.AI });
     const model = ai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
-    console.log("Model initialized:", model.modelId);
 
     // Collect all tools, including MCP tools
     let mcpTools = {};
     try {
       mcpTools = this.mcp.getAITools();
-    } catch (e) {
-      console.warn("Failed to get MCP tools:", e);
+    } catch (e: any) {
+      // Silence the 'jsonSchema not initialized' warning as it's expected when no MCP servers are configured
+      if (!e?.message?.includes("jsonSchema not initialized")) {
+        console.warn("Failed to get MCP tools:", e);
+      }
     }
 
     const allTools = {
@@ -147,23 +208,33 @@ CORE BEHAVIOR:
 2. If the user gives a specific task at a specific time, use 'scheduleBlock'.
 3. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
 4. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
-5. Your responses should be minimal: either a tool call or a brief "Architecting your plan..." message.
+5. IMMUTABLE RULE: Always provide a brief verbal acknowledgement (e.g., "Architecting your plan...") whenever you use a tool. Never respond with an empty segment.
 
 Tools:
 - 'useArchitect': Use for projects/goals that need breaking down into steps.
 - 'scheduleBlock': For adding ANYTHING to the timeline.
 - 'updateBlock' / 'deleteBlock': For managing the timeline.
 `,
-
           messages: await convertToModelMessages(processedMessages),
           model,
           tools: allTools,
-          // Type boundary: streamText expects specific tool types, but base class uses ToolSet
-          // This is safe because our tools satisfy ToolSet interface (verified by 'satisfies' in tools.ts)
-          onFinish: onFinish as unknown as StreamTextOnFinishCallback<
-            typeof allTools
-          >,
-          stopWhen: stepCountIs(10),
+          maxSteps: 5,
+          onStepFinish: (step) => {
+            console.log(
+              `[Chat] Step finished. Tool calls: ${step.toolCalls.length}, Finish reason: ${step.finishReason}`,
+            );
+            if (step.toolCalls.length > 0) {
+              console.log(
+                `[Chat] Tool calls made: ${step.toolCalls.map((tc) => tc.toolName).join(", ")}`,
+              );
+            }
+          },
+          onFinish: (result) => {
+            console.log(
+              `[Chat] Stream finished. Text length: ${result.text?.length || 0}, Finish reason: ${result.finishReason}`,
+            );
+            return onFinish(result as any);
+          },
           abortSignal: options?.abortSignal,
         });
 
@@ -172,24 +243,6 @@ Tools:
     });
 
     return createUIMessageStreamResponse({ stream });
-  }
-  async executeTask(description: string, _task: Schedule<string>) {
-    await this.saveMessages([
-      ...this.messages,
-      {
-        id: generateId(),
-        role: "user",
-        parts: [
-          {
-            type: "text",
-            text: `Running scheduled task: ${description}`,
-          },
-        ],
-        metadata: {
-          createdAt: new Date(),
-        },
-      },
-    ]);
   }
 }
 

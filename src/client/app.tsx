@@ -80,7 +80,7 @@ export default function App() {
     setTheme(newTheme);
   };
 
-  const agent = useAgent<unknown, FluxState>({
+  const agent = useAgent<FluxState>({
     agent: "chat",
     onStateUpdate: (newState) => {
       // Merge with initial state structure to prevent bugs if partial state is sent
@@ -127,7 +127,7 @@ export default function App() {
     status,
     sendMessage,
     stop,
-  } = useAgentChat<unknown, UIMessage<{ createdAt: string }>>({
+  } = useAgentChat<FluxState, UIMessage<{ createdAt: string }>>({
     agent,
   });
 
