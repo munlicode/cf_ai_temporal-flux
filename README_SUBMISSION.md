@@ -1,6 +1,6 @@
 # Temporal Flux: Cloudflare Fast Track Submission
 
-Temporal Flux is an AI-powered "External Prefrontal Cortex" designed to replace rigid calendars with a fluid, antifragile flow control system.
+Temporal Flux is an AI-powered assistant that breaks down vague goals into concrete, actionable roadmaps. It leverages Cloudflare's full stack to provide an "Execution Engine" that turns intent into a prioritized timeline.
 
 ## Cloudflare Native Stack
 
@@ -10,13 +10,13 @@ This project leverages the full power of the Cloudflare developer platform to de
 
 - **Model**: `@cf/meta/llama-3.3-70b-instruct-fp8-fast`.
 - **Implementation**: Used for natural language intent analysis and goal decomposition.
-- **Location**: `src/server/server.ts` and `src/server/workflow.ts`.
+- **Location**: `src/server/server.ts` and `src/server/architect.ts`.
 
 ### 2. Coordination: Cloudflare Workflows
 
-- **Feature**: "The Strategist".
+- **Feature**: "The Architect".
 - **Implementation**: When a user provides a vague goal, a multi-step Workflow is triggered to brainstorm tasks, estimate durations, and push a structured plan back to the state engine.
-- **Location**: `src/server/workflow.ts`.
+- **Location**: `src/server/architect.ts`.
 
 ### 3. State & Consistency: Durable Objects
 
@@ -33,7 +33,7 @@ This project leverages the full power of the Cloudflare developer platform to de
 
 - **Tactical Command Center**: Distinct Strategy Zone (Backlog) and Execution Zone (Stream).
 - **Event Sourcing**: Every state change is an immutable event, allowing for full "Time Travel" and undo capabilities.
-- **The Strategist**: Automated project decomposition using AI-orchestrated workflows.
+- **The Architect**: Automated project decomposition using AI-orchestrated workflows.
 
 ## Development
 

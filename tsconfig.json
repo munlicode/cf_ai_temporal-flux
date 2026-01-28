@@ -8,6 +8,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/client/*"],
+      "@shared": ["./src/shared/index.ts"],
       "@shared/*": ["./src/shared/*"]
     },
     "types": ["@cloudflare/workers-types", "node", "vite/client"],

@@ -12,30 +12,23 @@ export type ApprovalStatus = (typeof APPROVAL)[keyof typeof APPROVAL];
  * Core Flux Data Structures
  */
 
-export interface TaskItem {
+export interface StreamBlock {
   id: string;
   title: string;
   description?: string;
-  duration?: number; // in minutes
+  duration?: number;
   priority: "high" | "medium" | "low";
   tags: string[];
-}
-
-export interface StreamBlock {
-  id: string;
-  taskId: string;
   startTime: string; // ISO string
   endTime: string; // ISO string
   status: "pending" | "completed" | "cancelled";
 }
 
 export type EventType =
-  | "TASK_CREATED"
-  | "TASK_UPDATED"
-  | "TASK_DELETED"
-  | "TIMELINE_SHIFTED"
   | "BLOCK_SCHEDULED"
-  | "BLOCK_UPDATED";
+  | "BLOCK_UPDATED"
+  | "BLOCK_DELETED"
+  | "TIMELINE_SHIFTED";
 
 export interface EventLog {
   id: string;
@@ -46,7 +39,6 @@ export interface EventLog {
 }
 
 export interface FluxState {
-  backlog: TaskItem[];
   stream: StreamBlock[];
   events: EventLog[];
 }

@@ -23,9 +23,9 @@
   },
   "workflows": [
     {
-      "name": "strategist",
-      "binding": "STRATEGIST",
-      "class_name": "StrategistWorkflow",
+      "name": "architect",
+      "binding": "ARCHITECT",
+      "class_name": "ArchitectWorkflow",
     },
   ],
   "observability": {

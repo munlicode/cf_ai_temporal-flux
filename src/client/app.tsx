@@ -16,7 +16,6 @@ import { Toggle } from "@/components/toggle/Toggle";
 import { Textarea } from "@/components/textarea/Textarea";
 import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { ToolInvocationCard } from "@/components/tool-invocation-card/ToolInvocationCard";
-import { BacklogView } from "@/components/backlog/BacklogView";
 import { StreamView } from "@/components/stream/StreamView";
 import { SidebarIcon } from "lucide-react";
 
@@ -49,7 +48,6 @@ export default function App() {
 
   // Flux State
   const [fluxState, setFluxState] = useState<FluxState>({
-    backlog: [],
     stream: [],
     events: [],
   });
@@ -154,14 +152,12 @@ export default function App() {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Handler for manual task deletion via UI
-  const handleDeleteTask = useCallback(
+  // Handler for manual block deletion via UI
+  const handleDeleteBlock = useCallback(
     async (id: string) => {
-      // We send a natural language command that maps to the 'deleteTask' tool
-      // The system prompt ensures this action is taken immediately.
       await sendMessage({
         role: "user",
-        parts: [{ type: "text", text: `Delete task ${id}` }],
+        parts: [{ type: "text", text: `Delete block ${id}` }],
       });
     },
     [sendMessage],
@@ -169,9 +165,7 @@ export default function App() {
 
   // Handler for adding a task via UI button
   const handleAddClick = useCallback(() => {
-    // Pre-fill the input to guide the user
-    setAgentInput("Add task: ");
-    // Focus happens automatically via state update + auto-resize logic or we can force it
+    setAgentInput("Schedule task: ");
     document.querySelector("textarea")?.focus();
   }, []);
 
@@ -218,23 +212,13 @@ export default function App() {
         </div>
       </div>
 
-      {/* 3-Column Layout */}
+      {/* 2-Column Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Column: Backlog */}
-        <div className="w-1/4 min-w-[300px] border-r border-ob-border bg-ob-base-100">
-          <BacklogView
-            tasks={fluxState.backlog}
-            onDeleteTask={handleDeleteTask}
-            onAddClick={handleAddClick}
-          />
-        </div>
-
-        {/* Center Column: Stream */}
-        <div className="w-1/4 min-w-[300px] border-r border-ob-border bg-ob-base-100/50">
+        {/* Left Column: Timeline */}
+        <div className="w-1/2 min-w-[400px] border-r border-ob-border bg-ob-base-100/50">
           <StreamView
             blocks={fluxState.stream}
-            backlog={fluxState.backlog}
-            onDeleteTask={handleDeleteTask}
+            onDeleteBlock={handleDeleteBlock}
           />
         </div>
 
@@ -273,8 +257,8 @@ export default function App() {
                   How can I help you flow?
                 </h3>
                 <p className="text-sm max-w-xs">
-                  Ask me to add tasks to your backlog or schedule existing ones
-                  into your stream.
+                  Ask the Architect to map out a goal or schedule a specific
+                  task onto your timeline.
                 </p>
               </div>
             )}

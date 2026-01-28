@@ -31,18 +31,68 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     this.env = env;
     this.id = state.id.toString();
     this.initialState = {
-      backlog: [
+      stream: [
         {
           id: "1",
           title: "Explore Flux",
-          description: "Check out the new backlog view",
+          description: "Check out your execution timeline",
           priority: "high",
           tags: ["onboarding"],
+          startTime: new Date().toISOString(),
+          endTime: new Date(Date.now() + 30 * 60000).toISOString(),
+          status: "pending",
         },
       ],
-      stream: [],
       events: [],
     };
+  }
+
+  /**
+   * Method called by the ArchitectWorkflow to push results into the state
+   */
+  async addTasksFromWorkflow(tasks: any[]) {
+    console.log(`Received ${tasks.length} tasks from workflow`);
+
+    let lastEndTime = new Date();
+    // Round to next 5 minute interval
+    lastEndTime.setMinutes(Math.ceil(lastEndTime.getMinutes() / 5) * 5, 0, 0);
+
+    const newBlocks = tasks.map((t) => {
+      const duration = t.durationMinutes || 30;
+      const startTime = new Date(lastEndTime.getTime() + 5 * 60000); // 5 min gap
+      const endTime = new Date(startTime.getTime() + duration * 60000);
+      lastEndTime = endTime;
+
+      return {
+        id: generateId(),
+        title: t.title,
+        description: t.description || "",
+        duration: duration,
+        priority: t.priority || "medium",
+        tags: ["architect", "auto-generated"],
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        status: "pending" as const,
+      };
+    });
+
+    const currentState = this.state;
+    this.setState({
+      ...currentState,
+      stream: [...(currentState.stream || []), ...newBlocks],
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "BLOCK_SCHEDULED",
+          payload: newBlocks,
+          timestamp: new Date().toISOString(),
+          reason: "Architect workflow completed and auto-scheduled",
+        },
+      ],
+    });
+
+    return { success: true };
   }
 
   /**
@@ -85,33 +135,24 @@ export class Chat extends AIChatAgent<Env, FluxState> {
         });
 
         const result = streamText({
-          system: `You manage the user's Backlog (Strategy) and Stream (Execution).
+          system: `You are the ARCHITECT, an AI Project Architect. Your goal is to turn vague user intents into concrete execution timelines.
 
-[SYSTEM CONTEXT]
+[CONTEXT]
 Today is: ${new Date().toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })}
-ISO Time: ${new Date().toISOString()}
+Timeline: ${this.state.stream?.length || 0} active blocks.
+[/CONTEXT]
 
-CURRENT APPLICATION STATE:
-Backlog (Unscheduled Tasks): ${JSON.stringify(this.state.backlog || [], null, 2)}
-Stream (Scheduled Blocks): ${JSON.stringify(this.state.stream || [], null, 2)}
-[/SYSTEM CONTEXT]
+CORE BEHAVIOR:
+1. If the user presents a GOAL (e.g., "I want to learn German"), IMMEDIATELY use 'useArchitect'.
+2. If the user gives a specific task at a specific time, use 'scheduleBlock'.
+3. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
+4. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
+5. Your responses should be minimal: either a tool call or a brief "Architecting your plan..." message.
 
-
-CRITICAL INSTRUCTIONS:
-1. You are a HEADLESS AGENT. Do NOT rely on conversational text.
-2. You MUST use tools to modify state. If you don't call a tool, nothing happens.
-3. If the user mentions a specific time (e.g., "at 3pm", "tomorrow morning"), IMMEDIATELY use 'scheduleBlock'.
-4. If the user has a general task without a time (e.g., "I need to buy milk"), use 'addToBacklog'.
-5. For updates or deletions, use 'updateTask' or 'deleteTask'.
-6. Do NOT ask for confirmation unless the request is genuinely unintelligible. Assume the user wants action.
-7. Your response should be EITHER a tool call OR a very brief confirmation (e.g., "Done.").
-
-Tools Available:
-- 'addToBacklog': For unassigned tasks.
-- 'updateTask': Modify existing tasks.
-- 'deleteTask': Remove tasks and their scheduled blocks.
-- 'scheduleBlock': For tasks with a time.
-- 'getLocalTime': If you need to resolve relative times like "tomorrow".
+Tools:
+- 'useArchitect': Use for projects/goals that need breaking down into steps.
+- 'scheduleBlock': For adding ANYTHING to the timeline.
+- 'updateBlock' / 'deleteBlock': For managing the timeline.
 `,
 
           messages: await convertToModelMessages(processedMessages),
@@ -155,7 +196,7 @@ Tools Available:
 /**
  * Worker entry point that routes incoming requests to the appropriate handler
  */
-export { StrategistWorkflow } from "./workflow";
+export { ArchitectWorkflow } from "./architect";
 
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext) {

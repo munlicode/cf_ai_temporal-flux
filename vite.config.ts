@@ -17,12 +17,4 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
   },
-  // server: {
-  //   proxy: {
-  //     "/agents": {
-  //       target: "http://localhost:8787",
-  //       ws: true,
-  //     },
-  //   },
-  // },
 });

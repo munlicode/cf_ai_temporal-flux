@@ -9,11 +9,10 @@ import {
   scheduleTaskSchema,
   getScheduledTasksSchema,
   cancelScheduledTaskSchema,
-  addToBacklogSchema,
   scheduleBlockSchema,
-  updateTaskSchema,
-  deleteTaskSchema,
-  useStrategistSchema,
+  updateBlockSchema,
+  deleteBlockSchema,
+  useArchitectSchema,
   type FluxState,
 } from "../shared";
 
@@ -37,66 +36,30 @@ const getLocalTime = tool({
   },
 });
 
-const addToBacklog = tool({
-  description: addToBacklogSchema.description,
-  inputSchema: addToBacklogSchema.parameters,
-  execute: async (task) => {
-    const { agent } = getCurrentAgent<Chat>();
-    const newTask = {
-      id: crypto.randomUUID(),
-      title: task.title,
-      description: task.description,
-      priority: task.priority,
-      tags: task.tags || [],
-    };
-
-    // Update state
-    const currentState = agent!.state;
-    agent!.setState({
-      ...currentState,
-      backlog: [...(currentState.backlog || []), newTask],
-      events: [
-        ...(currentState.events || []),
-        {
-          id: crypto.randomUUID(),
-          type: "TASK_CREATED",
-          payload: newTask,
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    });
-
-    return `Added "${task.title}" to backlog.`;
-  },
-});
+// addToBacklog tool removed - use scheduleBlock instead
 
 const scheduleBlock = tool({
   description: scheduleBlockSchema.description,
   inputSchema: scheduleBlockSchema.parameters,
-  execute: async (block) => {
+  execute: async (input) => {
     const { agent } = getCurrentAgent<Chat>();
 
     // Helper to ensure full ISO string
     const normalizeTime = (timeStr: string) => {
       if (timeStr.includes("T")) return timeStr; // Already ISO
-      // Assuming HH:MM or HH:MM:SS format for today
       const today = new Date().toISOString().split("T")[0];
       return `${today}T${timeStr}`;
     };
 
-    const startTime = normalizeTime(block.startTime);
-    const endTime = normalizeTime(block.endTime);
-
-    // Create ephemeral ID if no backlog task is provided
-    // Sanitize: AI sometimes passes "null" or empty strings
-    const taskId =
-      block.taskId && block.taskId !== "null" && block.taskId !== ""
-        ? block.taskId
-        : crypto.randomUUID();
+    const startTime = normalizeTime(input.startTime);
+    const endTime = normalizeTime(input.endTime);
 
     const newBlock = {
       id: crypto.randomUUID(),
-      taskId,
+      title: input.title,
+      description: input.description,
+      priority: input.priority,
+      tags: input.tags || [],
       startTime,
       endTime,
       status: "pending" as const,
@@ -104,38 +67,11 @@ const scheduleBlock = tool({
 
     // Update state
     const currentState = agent!.state;
-
-    // If this is a new ad-hoc task (no taskId provided), add it to backlog implicitly
-    let newBacklog = currentState.backlog || [];
-    let newEvents = currentState.events || [];
-
-    // Check if task exists, if not create it
-    const taskExists = newBacklog.find((t) => t.id === taskId);
-    if (!taskExists) {
-      const newTask = {
-        id: taskId,
-        title: block.title,
-        priority: "medium" as const, // Default priority
-        tags: ["scheduled"],
-      };
-      newBacklog = [...newBacklog, newTask];
-      newEvents = [
-        ...newEvents,
-        {
-          id: crypto.randomUUID(),
-          type: "TASK_CREATED",
-          payload: newTask,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-    }
-
     agent!.setState({
       ...currentState,
-      backlog: newBacklog,
       stream: [...(currentState.stream || []), newBlock],
       events: [
-        ...newEvents,
+        ...(currentState.events || []),
         {
           id: crypto.randomUUID(),
           type: "BLOCK_SCHEDULED",
@@ -145,75 +81,69 @@ const scheduleBlock = tool({
       ],
     });
 
-    return `Scheduled "${block.title}" from ${new Date(startTime).toLocaleTimeString()} to ${new Date(endTime).toLocaleTimeString()}.`;
+    return `Scheduled "${input.title}" from ${new Date(startTime).toLocaleTimeString()} to ${new Date(endTime).toLocaleTimeString()}.`;
   },
 });
 
-const updateTask = tool({
-  description: updateTaskSchema.description,
-  inputSchema: updateTaskSchema.parameters,
+const updateBlock = tool({
+  description: updateBlockSchema.description,
+  inputSchema: updateBlockSchema.parameters,
   execute: async ({ id, updates }) => {
     const { agent } = getCurrentAgent<Chat>();
     const currentState = agent!.state;
 
-    const backlog = currentState.backlog || [];
-    const taskIndex = backlog.findIndex((t) => t.id === id);
+    const stream = currentState.stream || [];
+    const blockIndex = stream.findIndex((b) => b.id === id);
 
-    if (taskIndex === -1) {
-      return `Task with ID ${id} not found.`;
+    if (blockIndex === -1) {
+      return `Block with ID ${id} not found on timeline.`;
     }
 
-    const updatedTask = { ...backlog[taskIndex], ...updates };
-    const newBacklog = [...backlog];
-    newBacklog[taskIndex] = updatedTask;
+    const updatedBlock = { ...stream[blockIndex], ...updates };
+    const newStream = [...stream];
+    newStream[blockIndex] = updatedBlock;
 
     agent!.setState({
       ...currentState,
-      backlog: newBacklog,
-      events: [
-        ...(currentState.events || []),
-        {
-          id: crypto.randomUUID(),
-          type: "TASK_UPDATED",
-          payload: { id, updates },
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    });
-    return `Updated task ${updatedTask.title}`;
-  },
-});
-
-const deleteTask = tool({
-  description: deleteTaskSchema.description,
-  inputSchema: deleteTaskSchema.parameters,
-  execute: async ({ id }) => {
-    const { agent } = getCurrentAgent<Chat>();
-    const currentState = agent!.state;
-
-    // Remove from backlog
-    const backlog = currentState.backlog || [];
-    const newBacklog = backlog.filter((t) => t.id !== id);
-
-    // Remove from stream
-    const stream = currentState.stream || [];
-    const newStream = stream.filter((b) => b.taskId !== id);
-
-    agent!.setState({
-      ...currentState,
-      backlog: newBacklog,
       stream: newStream,
       events: [
         ...(currentState.events || []),
         {
           id: crypto.randomUUID(),
-          type: "TASK_DELETED",
+          type: "BLOCK_UPDATED",
+          payload: { id, updates },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    return `Updated block "${updatedBlock.title}" on timeline.`;
+  },
+});
+
+const deleteBlock = tool({
+  description: deleteBlockSchema.description,
+  inputSchema: deleteBlockSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const currentState = agent!.state;
+
+    const stream = currentState.stream || [];
+    const newStream = stream.filter((b) => b.id !== id);
+
+    agent!.setState({
+      ...currentState,
+      stream: newStream,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: crypto.randomUUID(),
+          type: "BLOCK_DELETED",
           payload: { id },
           timestamp: new Date().toISOString(),
         },
       ],
     });
-    return `Deleted task ${id} and associated blocks.`;
+    return `Deleted block ${id} from timeline.`;
   },
 });
 
@@ -294,9 +224,10 @@ const cancelScheduledTask = tool({
   },
 });
 
-const useStrategist = tool({
-  description: useStrategistSchema.description,
-  inputSchema: useStrategistSchema.parameters,
+const useArchitect = tool({
+  description:
+    "Trigger 'The Architect' workflow. Use this for ANY high-level goal, vague request, or project that needs to be broken down into steps (e.g., 'Learn German', 'Build a house', 'Plan a wedding').",
+  inputSchema: useArchitectSchema.parameters,
   execute: async ({ goal }: { goal: string }) => {
     const { agent } = getCurrentAgent<Chat>();
     // Use the agent id as userId
@@ -304,13 +235,13 @@ const useStrategist = tool({
 
     // Trigger workflow
     try {
-      await (agent! as any).env.STRATEGIST.create({
+      await (agent! as any).env.ARCHITECT.create({
         payload: { goal, userId },
       });
-      return "Strategist Workflow started. I'll break down this goal and add tasks to your backlog shortly.";
+      return "Architect Workflow started. I'll break down this goal and add tasks to your timeline shortly.";
     } catch (error) {
-      console.error("Error triggering strategist workflow", error);
-      return `Failed to trigger strategist: ${error}`;
+      console.error("Error triggering architect workflow", error);
+      return `Failed to trigger architect: ${error}`;
     }
   },
 });
@@ -321,12 +252,10 @@ const useStrategist = tool({
 export const tools = {
   getWeatherInformation,
   getLocalTime,
-  addToBacklog,
   scheduleBlock,
-  updateTask,
-  deleteTask,
-  useStrategist,
-  // scheduleTask, // Disable old scheduler for now to avoid confusion
+  updateBlock,
+  deleteBlock,
+  useArchitect,
   getScheduledTasks,
   cancelScheduledTask,
 } satisfies ToolSet;

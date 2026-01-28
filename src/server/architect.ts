@@ -5,7 +5,7 @@ import {
 } from "cloudflare:workers";
 import type { Env } from "./config";
 
-export class StrategistWorkflow extends WorkflowEntrypoint<Env> {
+export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
   async run(
     event: WorkflowEvent<{ goal: string; userId: string }>,
     step: WorkflowStep,
@@ -21,7 +21,7 @@ export class StrategistWorkflow extends WorkflowEntrypoint<Env> {
             {
               role: "system",
               content:
-                "You are the 'Strategist'. Break down a vague goal into 3-5 concrete, actionable tasks. Return JSON: { tasks: [{ title: string, durationMinutes: number, priority: 'high'|'medium'|'low' }] }",
+                "You are the 'Architect'. Break down a vague goal into 3-5 concrete, actionable tasks that will be scheduled sequentially. Return JSON: { tasks: [{ title: string, description: string, durationMinutes: number, priority: 'high'|'medium'|'low' }] }",
             },
             { role: "user", content: goal },
           ],
@@ -31,15 +31,13 @@ export class StrategistWorkflow extends WorkflowEntrypoint<Env> {
       return JSON.parse(response.response).tasks;
     });
 
-    // Step 2: Push to Durable Object Backlog
-    await step.do("push-to-backlog", async () => {
-      // We would call the Durable Object here.
-      // For now, let's assume we have a way to signal the DO.
+    // Step 2: Push to Durable Object Timeline
+    await step.do("push-to-timeline", async () => {
       const doId = this.env.chat.idFromName(userId);
       const doStub = this.env.chat.get(doId);
 
-      // We need a method on the DO to receive workflow results
-      // await doStub.addTasksFromWorkflow(decomposition);
+      // Call the method on the DO to receive workflow results
+      await (doStub as any).addTasksFromWorkflow(decomposition);
     });
 
     return { status: "completed", taskCount: decomposition.length };

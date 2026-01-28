@@ -89,6 +89,16 @@ This file logs significant AI prompts used to generate core logic, architecture,
 4. Resolved TypeScript errors regarding the missing `SpeechRecognition` types on the `window` object.
 5. Cleaned up duplicate imports and component structure in `App.tsx`.
 
+## 2026-01-28
+
 ### Migration to single app structure
 
 **Prompt:** `Migrate to unified architecture instead of monorepo to leverage workers capabilities and simple deployment.`
+
+### Idea clarification
+
+**Prompt 1:** `I wonder about idea of app. Right now, this app does something confusing. It is not clear what it does, so should we instead focus on one thing lkie brainstorm ideas and create project plan with timelines? Or add more?`
+
+**Prompt 2:** `First lets change READMEs to embrace it. As you see in README.md#L6-10, idea is actually more of a personal. So lets instead delete all the stuff that is written about super calendar and just say something like 'AI powered app that breaks down an idea into actionable plan showing step-by-step action. You can use just by sending message like 'I want to learn German'. You can try any of these example prompts just to start. Good luck'. Rename "Strategist" to 'Architect'`
+
+**Prompt 3:** `Your task is to simplify state via removing backlog from durable object and shared types, remove @BacklogView.tsx / Strategy Zone component so the execution takes center stage, merge addToBacklog logic into the scheduling tools so every intent results in a timeline block, ensure the architect workflow pushes all decomposed steps directly into the timeline. Follow YAGNI princple to avoid unnecessary code. Bottom line is to simplify app, so even 5-y.o can use it without getting into that too much.`

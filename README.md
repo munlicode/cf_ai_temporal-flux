@@ -1,18 +1,21 @@
 # Flux
 
-**Adaptive Flow Control for Your Life.**
+**Build a step-by-step roadmap from any idea.**
 
-Traditional calendars are static storage bins. **Flux** is a dynamic engine that treats your schedule as a fluid stream. It uses AI to handle the chaos of daily life—oversleeping, unexpected delays, or energy dips—by instantly re-flowing your plans based on your natural language input.
+Flux is an AI-powered app that breaks down an idea into an actionable plan showing step-by-step action. You can use it just by sending a message like `I want to learn German`.
+You can try any of these example prompts just to start.
+
+- `I want to learn English`
+- `I want to start reading 20 books this year`
+- `I want to start running 5 times a week`
+- `I want to create a website where I can post blogs about how I help animals and show my journeys in jungles`
+- `I want to start learning to play guitar`
+
+Good luck!
 
 ## Why
 
-I had an idea to create an app that would assist with my daily life. The one that would remind me of what I promised, adjust for me and help to be better me. Therefore, I decided to use this assignment to implement a part of app that was more or clear to me.
-
-## ⚡ Core Concept: Backlog to Stream
-
-- **Backlog:** Unassigned tasks and goals (Strategy).
-- **Stream:** A continuous vertical timeline of the next 48 hours (Execution).
-- **Mechanism:** The AI agent pulls from the Backlog into the Stream based on context and priority. Don't drag blocks; just tell Flux what changed.
+I had an idea for an app that would assist with my daily life—reminding me of promises, adjusting for me, and helping me be a better version of myself. I've focused this assignment on the part of that vision that is most clear: turning vague goals into concrete execution plans.
 
 ## 🛠️ Stack
 
@@ -26,7 +29,7 @@ I had an idea to create an app that would assist with my daily life. The one tha
 ```bash
 # 1. Setup
 pnpm install
-npx wrangler login # Required for Workers AI local development
+npx wrangler login
 
 # 2. Develop
 pnpm dev
@@ -38,10 +41,6 @@ pnpm run deploy
 ## 🤖 AI Assisted
 
 This project is built with AI assistance. Significant prompts and logic generations are documented in [PROMPTS.md](./PROMPTS.md).
-
-## P.S.
-
-Some parts of repo might not be clear or designed well. Unfortunately, I was not able to comprehend the idea to the extend where it would be clear to me what is needed and what not.
 
 ## Gratitude
 

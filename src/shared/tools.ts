@@ -37,40 +37,15 @@ export const cancelScheduledTaskSchema = {
   }),
 };
 
-export const addToBacklogSchema = {
-  description: "Add a task to the backlog (unassigned tasks)",
-  parameters: z.object({
-    title: z.string().describe("The title of the task"),
-    description: z
-      .string()
-      .optional()
-      .describe("Additional details about the task"),
-    priority: z.enum(["high", "medium", "low"]).default("medium"),
-    tags: z
-      .preprocess((val) => {
-        if (typeof val === "string") {
-          try {
-            return JSON.parse(val);
-          } catch {
-            return val;
-          }
-        }
-        return val;
-      }, z.array(z.string()))
-      .optional(),
-  }),
-};
+// addToBacklogSchema removed in favor of direct scheduling
 
 export const scheduleBlockSchema = {
-  description: "Schedule a task block on the timeline (Stream)",
+  description: "Schedule a task block on the execution timeline",
   parameters: z.object({
     title: z.string().describe("The title of the task"),
-    taskId: z
-      .string()
-      .optional()
-      .describe(
-        "ID of an existing backlog task. IMPORTANT: Leave empty or omit if this is a new task without an existing ID. Do NOT pass 'null' as a string.",
-      ),
+    description: z.string().optional().describe("Description of the task"),
+    priority: z.enum(["high", "medium", "low"]).default("medium"),
+    tags: z.array(z.string()).optional(),
     startTime: z
       .string()
       .describe("ISO 8601 start time (e.g., 2024-01-27T20:00:00)"),
@@ -78,15 +53,18 @@ export const scheduleBlockSchema = {
   }),
 };
 
-export const updateTaskSchema = {
-  description: "Update an existing task in the backlog",
+export const updateBlockSchema = {
+  description: "Update an existing block on the timeline",
   parameters: z.object({
-    id: z.string().describe("The ID of the task to update"),
+    id: z.string().describe("The ID of the block to update"),
     updates: z
       .object({
         title: z.string().optional(),
         description: z.string().optional(),
         priority: z.enum(["high", "medium", "low"]).optional(),
+        startTime: z.string().optional(),
+        endTime: z.string().optional(),
+        status: z.enum(["pending", "completed", "cancelled"]).optional(),
         tags: z
           .preprocess((val) => {
             if (typeof val === "string") {
@@ -104,17 +82,16 @@ export const updateTaskSchema = {
   }),
 };
 
-export const deleteTaskSchema = {
-  description:
-    "Delete a task from the backlog and remove all its scheduled blocks",
+export const deleteBlockSchema = {
+  description: "Delete a block from the timeline",
   parameters: z.object({
-    id: z.string().describe("The ID of the task to delete"),
+    id: z.string().describe("The ID of the block to delete"),
   }),
 };
 
-export const useStrategistSchema = {
+export const useArchitectSchema = {
   description:
-    "Trigger 'The Strategist' workflow to break down a vague goal into concrete tasks.",
+    "Trigger 'The Architect' workflow to break down a vague goal into concrete tasks.",
   parameters: z.object({
     goal: z.string().describe("The high-level goal to decompose"),
   }),
