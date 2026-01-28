@@ -77,8 +77,17 @@ export default function App() {
     setTheme(newTheme);
   };
 
+  const [userId] = useState(() => {
+    const savedId = localStorage.getItem("flux_user_id");
+    if (savedId) return savedId;
+    const newId = crypto.randomUUID();
+    localStorage.setItem("flux_user_id", newId);
+    return newId;
+  });
+
   const agent = useAgent<FluxState>({
     agent: "chat",
+    name: userId,
     onStateUpdate: (newState) => {
       // Merge with initial state structure to prevent bugs if partial state is sent
       setFluxState((prev) => ({
