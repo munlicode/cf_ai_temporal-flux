@@ -1,44 +1,38 @@
 # Temporal Flux: Cloudflare Fast Track Submission
 
-Temporal Flux is an AI-powered assistant that breaks down vague goals into concrete, actionable roadmaps. It leverages Cloudflare's full stack to provide an "Execution Engine" that turns intent into a prioritized timeline.
+**Temporal Flux** is an AI-native execution engine that turns vague intents into concrete, actionable timelines. It replaces the traditional "Backlog" with a single, unified reality: **The Execution Timeline**.
 
-## Cloudflare Native Stack
+## 🚀 The Philosophy: Execution over Strategy
 
-This project leverages the full power of the Cloudflare developer platform to deliver a high-performance, edge-first AI application.
+Most systems fail because the "Strategy" (what to do) never meets the "Execution" (when to do it). Flux bridges this gap by merging them. Every goal is immediately decomposed and scheduled.
+
+## 🛠️ Cloudflare Native Stack
 
 ### 1. LLM: Workers AI
 
 - **Model**: `@cf/meta/llama-3.3-70b-instruct-fp8-fast`.
-- **Implementation**: Used for natural language intent analysis and goal decomposition.
-- **Location**: `src/server/server.ts` and `src/server/architect.ts`.
+- **Function**: Perceptive intent analysis and deterministic task scheduling.
 
 ### 2. Coordination: Cloudflare Workflows
 
-- **Feature**: "The Architect".
-- **Implementation**: When a user provides a vague goal, a multi-step Workflow is triggered to brainstorm tasks, estimate durations, and push a structured plan back to the state engine.
-- **Location**: `src/server/architect.ts`.
+- **The Architect**: A multi-step background workflow that brainstorms, estimates, and auto-schedules project plans. It ensures complex goals are broken down without blocking the user interface.
 
-### 3. State & Consistency: Durable Objects
+### 3. State Engine: Durable Objects + SQLite
 
-- **Feature**: Realtime sync and event sourcing.
-- **Implementation**: The "Source of Truth" for the schedule lives in a Durable Object with transactional SQLite storage. It handles WebSocket connections for zero-latency state updates.
-- **Location**: `src/server/server.ts`.
+- **Transactionality**: All timeline state lives in a Durable Object, leveraging its transactional SQLite storage for 100% consistency.
+- **Real-time Sync**: Uses WebSockets to sync state changes to the UI within milliseconds.
 
-### 4. Frontend: Pages + Vite
+### 4. Human Enablement: Web Speech API
 
-- **Implementation**: A React/TypeScript SPA deployed on Cloudflare Pages, integrated with the Hono backend via the `_worker.js` pattern.
-- **Location**: `src/client/`.
+- **Voice-to-Execution**: Integrated voice input allows users to "speak" tasks directly into existence, reducing friction to near zero.
 
-## Key Features
+## 🏗️ Technical Highlights
 
-- **Tactical Command Center**: Distinct Strategy Zone (Backlog) and Execution Zone (Stream).
-- **Event Sourcing**: Every state change is an immutable event, allowing for full "Time Travel" and undo capabilities.
-- **The Architect**: Automated project decomposition using AI-orchestrated workflows.
+- **JSON Self-Healing**: The Architect workflow includes logic to detect and repair truncated JSON responses from the LLM, ensuring reliability at the edge.
+- **Event Sourcing**: Every state mutation is logged as an immutable event, enabling full audit trails and "Time Travel" capabilities.
 
-## Development
+## 🏁 Quality Checklist
 
-```bash
-pnpm install
-pnpm run dev      # Frontend + Hono Worker
-pnpm run build    # Unified production build
-```
+- [x] **YAGNI**: No unused components or dead code.
+- [x] **Premium UI**: OKLCH color palette with high-contrast, modern aesthetics.
+- [x] **Strict Types**: Shared TypeScript interfaces between Worker and Front-end.

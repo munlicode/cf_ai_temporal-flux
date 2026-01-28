@@ -5,11 +5,11 @@
 Flux is an AI-powered app that breaks down an idea into an actionable plan showing step-by-step action. You can use it just by sending a message like `I want to learn German`.
 You can try any of these example prompts just to start.
 
-- `I want to learn English`
-- `I want to start reading 20 books this year`
-- `I want to start running 5 times a week`
-- `I want to create a website where I can post blogs about how I help animals and show my journeys in jungles`
-- `I want to start learning to play guitar`
+- `I want to learn German`
+- `I want to launch a SaaS landing page using Cloudflare`
+- `I want to build a fitness routine for the next 30 days`
+- `I want to write a technical blog post about Durable Objects`
+- `I want to prepare for a software engineering interview`
 
 Good luck!
 
@@ -38,9 +38,9 @@ pnpm dev
 pnpm run deploy
 ```
 
-## 🤖 AI Assisted
+## 🤖 AI Native
 
-This project is built with AI assistance. Significant prompts and logic generations are documented in [PROMPTS.md](./PROMPTS.md).
+This project is built using an AI-native development workflow. Our core **System Prompts**, tool definitions, and architectural roadmap are documented in **[PROMPTS.md](./PROMPTS.md)**.
 
 ## Gratitude
 

@@ -1,23 +1,13 @@
 import {
-  getWeatherInformationSchema,
-  getLocalTimeSchema,
-  scheduleTaskSchema,
-  getScheduledTasksSchema,
-  cancelScheduledTaskSchema,
-  addToBacklogSchema,
+  updateBlockSchema,
   scheduleBlockSchema,
-  updateTaskSchema,
-  deleteTaskSchema,
+  deleteBlockSchema,
+  useArchitectSchema,
 } from "../shared";
 
 export const tools = {
-  getWeatherInformation: getWeatherInformationSchema,
-  getLocalTime: getLocalTimeSchema,
-  scheduleTask: scheduleTaskSchema,
-  getScheduledTasks: getScheduledTasksSchema,
-  cancelScheduledTask: cancelScheduledTaskSchema,
-  addToBacklog: addToBacklogSchema,
+  useArchitect: useArchitectSchema,
+  deleteBlock: deleteBlockSchema,
+  updateBlock: updateBlockSchema,
   scheduleBlock: scheduleBlockSchema,
-  updateTask: updateTaskSchema,
-  deleteTask: deleteTaskSchema,
 };

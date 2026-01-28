@@ -1,9 +1,9 @@
 type SectionProps = {
-  children?: React.ReactNode;
+	children?: React.ReactNode;
 };
 
 const Section = ({ children }: SectionProps) => {
-  return <section className="w-full">{children}</section>;
+	return <section className="w-full">{children}</section>;
 };
 
 export default Section;

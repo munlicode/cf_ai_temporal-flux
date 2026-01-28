@@ -1,35 +1,35 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cf-ai-temporal-flux",
-  "main": "src/server/server.ts",
-  "compatibility_date": "2024-09-23",
-  "compatibility_flags": ["nodejs_compat"],
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "chat",
-        "class_name": "Chat",
-      },
-    ],
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": ["Chat"],
-    },
-  ],
-  "ai": {
-    "binding": "AI",
-  },
-  "workflows": [
-    {
-      "name": "architect",
-      "binding": "ARCHITECT",
-      "class_name": "ArchitectWorkflow",
-    },
-  ],
-  "observability": {
-    "enabled": true,
-  },
-  "pages_build_output_dir": "dist",
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "cf-ai-temporal-flux-worker",
+	"main": "src/server/server.ts",
+	"compatibility_date": "2024-09-23",
+	"compatibility_flags": ["nodejs_compat"],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "chat",
+				"class_name": "Chat"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["Chat"]
+		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"workflows": [
+		{
+			"name": "architect",
+			"binding": "ARCHITECT",
+			"class_name": "ArchitectWorkflow"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"pages_build_output_dir": "dist"
 }

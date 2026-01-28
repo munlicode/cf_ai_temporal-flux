@@ -1,104 +1,84 @@
-# AI Prompts & Logic Generations
+# Flux AI Prompts & Logic
 
-This file logs significant AI prompts used to generate core logic, architecture, or documentation for **Flux** (`cf-ai-temporal-flux`).
+This registry documents the prompt engineering that powers **Flux**. It is divided into **Runtime System Prompts** (application logic) and **Development Prompts** (architecture generation).
 
-## 📅 2026-01-26
+---
 
-### Project Scaffolding
+## 🧠 Runtime System Prompts
 
-**Context:** Scaffolding the initial root README.md to establish project identity and mission.
-**Prompt:** `Lets start scaffolding project. First we need to clean the file structure and make it fit required scope(Cloudflare AI app )`
-**Outcome:** Generated a clear file structure for the project.
+_These prompts are embedded in the application and define the AI's persona and logic._
 
-### Documentation Refinement
+### 1. The Architect (Main Interaction Agent)
 
-**Context:** Simplifying the README.md to be more concise and focused.
-**Prompt:** `I think README is way to blunt. I believe we should simplify it to keep only what is needed. Why should be simple, short and clear.`
-**Outcome:** Condensed the README to its essential components, focusing on the core value proposition and minimalist stack/setup details.
+**Location:** `src/server/server.ts`  
+**Purpose:** Orchestrates the user experience, schedules tasks, and triggers workflows.
 
-### Infrastructure Migration
+```markdown
+You are the ARCHITECT, an AI Project Architect. Your goal is to turn vague user intents into concrete execution timelines.
 
-**Context:** Migrating from npm to pnpm and configuring Turborepo for better monorepo management.
-**Prompt:** `Update project to use pnpm as package manager and configure tubro . Update all records of using npm to pnpm`
-**Outcome:** Successfully migrated to `pnpm`, created `pnpm-workspace.yaml`, configured `turbo.json`, and updated all documentation and scripts.
+[CONTEXT]
+Today is: {{currentDate}}
+Timeline: {{activeBlockCount}} active blocks.
+[/CONTEXT]
 
-## 📅 2026-01-27
+CORE BEHAVIOR:
 
-### Production Grade Evaluation
+1. If the user presents a GOAL (e.g., "I want to learn German"), IMMEDIATELY use 'useArchitect'.
+2. If the user gives a specific task at a specific time, use 'scheduleBlock'.
+3. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
+4. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
+5. IMMUTABLE RULE: Always provide a brief verbal acknowledgement (e.g., "Architecting your plan...") whenever you use a tool. Never respond with an empty segment.
 
-**Context:** Evaluating the existing monorepo structure for production readiness, identifying gaps in type safety, shared logic, and reliability.
-**Prompt:** `Find all the gaps in current structure that worsen design of system`
-**Outcome:** Identified critical gaps in shared logic (duplicated constants), type safety (use of `any`), and lack of automated testing. Created a multi-phase implementation plan starting with a shared package foundation.
+Tools:
 
-### Implementing Shared Foundation
+- 'useArchitect': Use for projects/goals that need breaking down into steps.
+- 'scheduleBlock': For adding ANYTHING to the timeline.
+- 'updateBlock' / 'deleteBlock': For managing the timeline.
+```
 
-**Context:** Following up on the production grade roadmap to improve architectural integrity.
-**Prompt:** `lets do those.`
-**Outcome:** Created `@flux/shared` package to centralize constants and types. Migrated `APPROVAL` constants and defined core domain interfaces (`TaskItem`, `StreamBlock`, `FluxState`) for single-source-of-truth across the monorepo.
+### 2. The Decomposition Logic (Architect Workflow)
 
-### Refining UI & Cleaning Stale Dependencies
+**Location:** `src/server/architect.ts`  
+**Purpose:** Breaks down complex goals into a series of actionable steps with estimated durations.
 
-**Context:** The app had broken styling, a mobile-only fixed layout that didn't scale, and the backend was crashing due to a mandatory but missing `OPENAI_API_KEY`.
-**Prompt:** `Remove stale vars and packges(ai-sdk/openai) and update styling`
-**Outcome:** Removed unused `@ai-sdk/openai` package and mandatory `OPENAI_API_KEY` requirement from the worker. Revamped the design system with a premium OKLCH-based color palette, vibrant orange accents, a wider desktop layout (max-w-5xl), and improved contrast/responsive elements. Added custom scrollbars and rounded UI elements for a modern feel.
+```markdown
+You are the 'Architect'. Break down a vague goal into 3-5 concrete, actionable tasks that will be scheduled sequentially.
 
-### Flux UI Implementation: Backlog & Stream
+Return ONLY raw JSON:
+{
+"tasks": [
+{
+"title": string,
+"description": string,
+"durationMinutes": number,
+"priority": 'high'|'medium'|'low'
+}
+]
+}
+```
 
-**Context:** Transforming the application from a simple chat interface into the "Tactical Command Center" envisioned in the README.
-**Prompt:** `I want to start working on idea that was written in readme. How would you make it according readme?`
-**Outcome:** Implemented the core 3-column layout:
+---
 
-1. **Backlog (Left):** View for unassigned tasks.
-2. **Stream (Center):** Vertical 48-hour timeline.
-3. **Copilot (Right):** Existing AI chat interface.
-   Connected the frontend components to the backend `FluxState` using `onStateUpdate` synchronization, allowing real-time updates from the Durable Object to the UI.
+## 🛠️ Development Roadmap Prompts
 
-### System Personality Tuning
+_Key prompts used during the development of Flux to generate core features and maintain speed._
 
-**Context:** The AI agent was too passive, often asking clarifying questions (e.g., "Do you want to schedule this?") even when the user provided clear time constraints. This friction slowed down the "Flow Control" experience.
+### Phase 1: Foundation (2026-01-26)
 
-**Prompt:** `update the system prompt in @apps/worker/src/server.ts to be more decisive. Prefer action over questions when a time is mentioned.`
+- **Scaffolding:** `Lets start scaffolding project. First we need to clean the file structure and make it fit required scope (Cloudflare AI app).`
+- **Documentation:** `I think README is way to blunt. I believe we should simplify it to keep only what is needed. Why should be simple, short and clear.`
+- **Infrastructure:** `Update project to use pnpm as package manager and configure turbo. Update all records of using npm to pnpm.`
 
-**Outcome:** Updated the system prompt in `apps/worker/src/server.ts` to instruct the model to be "decisive" and "prefer action". Explicitly added rules to:
+### Phase 2: Production Grade (2026-01-27)
 
-1. IMMEDIATELY schedule tasks if a time is mentioned without asking for confirmation.
-2. Only ask clarifying questions if the request is ambiguous AND has no time component.
-3. Updated the model to `llama-3.1-8b-instruct` for potentially better instruction following.
+- **Evaluation:** `Find all the gaps in current structure that worsen design of system.`
+- **Shared Logic:** `Create @flux/shared package to centralize constants and types.`
+- **Design System:** `Remove stale vars and packages (ai-sdk/openai) and update styling to a premium OKLCH-based color palette.`
+- **UI Architecture:** `I want to start working on idea that was written in readme. How would you make it according readme?`
 
-### Update & Delete Tools Implementation
+### Phase 3: Decisive Action & Efficiency (2026-01-28)
 
-**Prompt:** `Implement `updateTask`and`deleteTask` tools in the backend (@apps/worker/src/tools.ts) to allow modifying and removing items from the Backlog and Stream. Then, disable the text-only chat and strictly use the AI Agent to perform these actions via natural language (e.g., "Delete the milk task" or "Rename that task to 'Gym'"). Finally, wire up the existing UI buttons (Plus icon, etc.) to trigger these same tools manually.`
-
-**Outcome:**
-
-1. Implemented `updateTask` and `deleteTask` in `apps/worker/src/tools.ts`, enabling modification and deletion of tasks via the Agent.
-2. Modified `App.tsx`, `BacklogView.tsx`, and `StreamView.tsx` to wire up UI delete buttons. These buttons now send natural language commands (e.g., "Delete task 123") to the Agent, maintaining the "One Brain" architecture where all state changes go through the LLM.
-3. Updated the system prompt in `server.ts` to enforce a "Headless Agent" persona that acts immediately on tools.
-
-### Feature: Voice Input Integration
-
-**Prompt:** `Prioritize adding Voice Input functionality to the web app (`apps/web`). Create a `VoiceInput`component that uses the browser's Web Speech API for speech-to-text. It should have a microphone icon that indicates listening state. Integrate this into the main`App.tsx` chat interface so that spoken words are appended to the user's message input. Ensure the layout is clean (icon inside the input container) and handle any TypeScript issues related to the Speech API. Don't worry about database optimization right now; focus on this "Human Enablement" feature.`
-
-**Context:** The user wants to enhance the "Human Enablement" aspect of the Flux engine by reducing friction. Typing commands is slower than speaking them. This features allows for quicker capturing of thoughts into the system.
-
-**Outcome:**
-
-1. Created `apps/web/src/components/voice-input/VoiceInput.tsx` using the `webkitSpeechRecognition` API.
-2. Integrated `VoiceInput` into `App.tsx`, placing the microphone icon to the left of the text input area.
-3. Implemented logic to append transcribed text to the existing input and auto-resize the textarea.
-4. Resolved TypeScript errors regarding the missing `SpeechRecognition` types on the `window` object.
-5. Cleaned up duplicate imports and component structure in `App.tsx`.
-
-## 2026-01-28
-
-### Migration to single app structure
-
-**Prompt:** `Migrate to unified architecture instead of monorepo to leverage workers capabilities and simple deployment.`
-
-### Idea clarification
-
-**Prompt 1:** `I wonder about idea of app. Right now, this app does something confusing. It is not clear what it does, so should we instead focus on one thing lkie brainstorm ideas and create project plan with timelines? Or add more?`
-
-**Prompt 2:** `First lets change READMEs to embrace it. As you see in README.md#L6-10, idea is actually more of a personal. So lets instead delete all the stuff that is written about super calendar and just say something like 'AI powered app that breaks down an idea into actionable plan showing step-by-step action. You can use just by sending message like 'I want to learn German'. You can try any of these example prompts just to start. Good luck'. Rename "Strategist" to 'Architect'`
-
-**Prompt 3:** `Your task is to simplify state via removing backlog from durable object and shared types, remove @BacklogView.tsx / Strategy Zone component so the execution takes center stage, merge addToBacklog logic into the scheduling tools so every intent results in a timeline block, ensure the architect workflow pushes all decomposed steps directly into the timeline. Follow YAGNI princple to avoid unnecessary code. Bottom line is to simplify app, so even 5-y.o can use it without getting into that too much.`
+- **Persona Tuning:** `update the system prompt... to be more decisive. Prefer action over questions when a time is mentioned.`
+- **Tooling Implementation:** `Implement updateTask and deleteTask tools in the backend... disable the text-only chat and strictly use the AI Agent.`
+- **Unified Architecture:** `Migrate to unified architecture instead of monorepo to leverage workers capabilities and simple deployment.`
+- **Simplification (YAGNI):** `Simplify state via removing backlog... merge addToBacklog logic into the scheduling tools so every intent results in a timeline block. Follow YAGNI principle.`
