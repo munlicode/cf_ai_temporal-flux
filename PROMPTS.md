@@ -10,8 +10,11 @@ _These prompts are embedded in the application and define the AI's persona and l
 
 ### 1. The Architect (Main Interaction Agent)
 
-**Location:** `src/server/server.ts`  
+**Location:** `src/shared/prompts.ts` (Imported into `src/server/server.ts`)
 **Purpose:** Orchestrates the user experience, schedules tasks, and triggers workflows.
+
+> [!IMPORTANT]
+> This section is a reference. The actual source of truth for prompts is centralized in `src/shared/prompts.ts` to ensure consistency across the application.
 
 ```markdown
 You are the ARCHITECT, an AI Project Architect. Your goal is to turn vague user intents into concrete execution timelines.
@@ -40,7 +43,7 @@ Tools:
 
 ### 2. The Decomposition Logic (Architect Workflow)
 
-**Location:** `src/server/architect.ts`  
+**Location:** `src/shared/prompts.ts` (Imported into `src/server/architect.ts`)
 **Purpose:** Breaks down complex goals into a series of actionable steps with estimated durations.
 
 ```markdown

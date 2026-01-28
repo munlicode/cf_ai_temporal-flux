@@ -4,6 +4,7 @@ import {
   type WorkflowStep,
 } from "cloudflare:workers";
 import type { Env } from "./config";
+import { PROMPTS } from "@shared";
 
 export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
   async run(
@@ -46,19 +47,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
               messages: [
                 {
                   role: "system",
-                  content: `You are the 'Architect'. Break down a vague goal into 3-5 concrete, actionable tasks that will be scheduled sequentially.
-
-Return ONLY raw JSON:
-{
-"tasks": [
-{
-"title": string,
-"description": string,
-"durationMinutes": number,
-"priority": 'high'|'medium'|'low'
-}
-]
-}`,
+                  content: PROMPTS.DECOMPOSITION_LOGIC,
                 },
                 { role: "user", content: goal },
               ],

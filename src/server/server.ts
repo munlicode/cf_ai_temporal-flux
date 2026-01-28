@@ -17,6 +17,7 @@ import { processToolCalls, cleanupMessages } from "@shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
 import type { FluxState, StreamBlock, WorkflowStatus, Plan } from "@shared";
+import { PROMPTS } from "@shared";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -419,27 +420,17 @@ export class Chat extends AIChatAgent<Env, FluxState> {
         });
 
         const result = streamText({
-          system: `You are the ARCHITECT, an AI Project Architect. Your goal is to turn vague user intents into concrete execution timelines.
-
-[CONTEXT]
-Today is: ${new Date().toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })}
-Timeline: ${this.getActivePlan()?.stream?.length || 0} active blocks.
-[/CONTEXT]
-
-CORE BEHAVIOR:
-1. If the user presents a major new GOAL or context (e.g., "I want to learn German"), check if a relevant plan exists; if not, suggest or use 'createPlan'.
-2. If the user wants to break down a goal WITHIN the active plan, use 'useArchitect'.
-3. If the user gives a specific task at a specific time, use 'scheduleBlock'.
-4. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
-5. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
-6. CRITICAL: You MUST always start your response with a short verbal phrase (e.g., "I'm on it.", "Scheduling that now...", "Let me structure that query...") BEFORE calling any tool. A response with ONLY a tool call is FORBIDDEN.
-
-Tools:
-- 'useArchitect': Use for projects/goals that need breaking down into steps.
-- 'scheduleBlock': For adding ANYTHING to the timeline.
-- 'updateBlock' / 'deleteBlock': For managing the timeline.
-- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': For managing multiple plans.
-`,
+          system: PROMPTS.ARCHITECT_SYSTEM(
+            this.getActivePlan()?.stream?.length || 0,
+            new Date().toLocaleString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            }),
+          ),
           messages: await convertToModelMessages(processedMessages),
           model,
           tools: allTools,
