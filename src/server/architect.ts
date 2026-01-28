@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
-import type { Env } from "./config";
+import { type Env, createLogger } from "./config";
 import { PROMPTS } from "@shared";
 
 export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
@@ -12,11 +12,14 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
     step: WorkflowStep,
   ) {
     const { goal, userId } = event.payload;
+    const logger = createLogger(this.env.LOG_LEVEL);
 
     if (!goal || !userId) {
       return { status: "failed", reason: "Missing parameters" };
     }
-    console.log(`[Architect] Starting workflow`);
+    logger.info(
+      `[Architect] Starting workflow for goal: ${goal.slice(0, 50)}...`,
+    );
     const doId = this.env.chat.idFromString(userId);
     const doStub = this.env.chat.get(doId);
 
@@ -39,7 +42,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
     // Step 1: Research/Brainstorming with AI
     const decomposition = await step
       .do("decompose-goal", async () => {
-        console.log(`[Architect] Running AI decomposition...`);
+        logger.debug(`[Architect] Running AI decomposition...`);
         try {
           return await this.env.AI.run(
             "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
@@ -60,7 +63,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
       })
       .then((response: any) => {
         const text = response.response;
-        console.log(`[Architect] Received AI response (${text.length} chars)`);
+        logger.debug(`[Architect] AI response received (${text.length} chars)`);
 
         try {
           const startIndex = text.indexOf("{");
@@ -98,9 +101,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
             throw new Error("Could not find tasks array in AI response");
           }
 
-          console.log(
-            `[Architect] Successfully decomposed into ${tasks.length} tasks`,
-          );
+          logger.info(`[Architect] Decomposed into ${tasks.length} tasks`);
           return tasks;
         } catch (e) {
           console.error(`[Architect] Parsing failed:`, e);
@@ -114,13 +115,13 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
 
     // Step 2: Push to Durable Object Timeline
     await step.do("push-to-timeline", async () => {
-      console.log(`[Architect] Pushing ${decomposition.length} tasks to DO...`);
+      logger.debug(`[Architect] Pushing tasks to DO...`);
       const doId = this.env.chat.idFromString(userId);
       const doStub = this.env.chat.get(doId);
 
       // Call the method on the DO to receive workflow results
       await (doStub as any).addTasksFromWorkflow(decomposition);
-      console.log(`[Architect] Workflow complete!`);
+      logger.info(`[Architect] Workflow complete!`);
     });
 
     return { status: "completed", taskCount: decomposition.length };

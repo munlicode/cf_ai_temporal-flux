@@ -1,0 +1,5 @@
+# Cloudflare Workers Local Environment Variables
+# Copy this to .dev.vars for local development
+
+# Set the logging level (debug, info, warn, error)
+LOG_LEVEL="debug"

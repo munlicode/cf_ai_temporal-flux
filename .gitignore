@@ -11,6 +11,7 @@ tmp/
 # Environment Variables (CRITICAL)
 .env
 .env.local
+.dev.vars
 *.key
 *.pem
 *.pat

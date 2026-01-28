@@ -15,7 +15,7 @@ import {
 import { createWorkersAI } from "workers-ai-provider";
 import { processToolCalls, cleanupMessages } from "@shared";
 import { tools, executions } from "./tools";
-import { validateEnv, type Env } from "./config";
+import { validateEnv, type Env, createLogger, type Logger } from "./config";
 import type { FluxState, StreamBlock, WorkflowStatus, Plan } from "@shared";
 import { PROMPTS } from "@shared";
 
@@ -25,51 +25,67 @@ import { PROMPTS } from "@shared";
 export class Chat extends AIChatAgent<Env, FluxState> {
   env: Env;
   id: string;
+  private logger: Logger;
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
-    console.log(`[Chat] Initializing new instance: ${state.id.toString()}`);
+    this.logger = createLogger(env.LOG_LEVEL);
+    this.logger.info(`[Chat] Initializing instance: ${state.id.toString()}`);
     this.env = env;
     this.id = state.id.toString();
 
-    // Check for migration
+    // Set a baseline initial state
+    const defaultPlanId = "1";
+    this.initialState = {
+      plans: {
+        [defaultPlanId]: {
+          id: defaultPlanId,
+          title: "Main Plan",
+          stream: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      activePlanId: defaultPlanId,
+      events: [],
+    };
+
+    // Attempt early migration if state is already available
+    this.ensureMigrated();
+  }
+
+  /**
+   * Safe migration from old single-stream state to multi-plan structure
+   */
+  private ensureMigrated(): FluxState | null {
     const currentState = this.state as any;
+    if (!currentState) return null;
+
     if (currentState.stream && !currentState.plans) {
-      console.log(`[Chat] Migrating state to multi-plan structure`);
-      const defaultPlanId = "default";
-      const defaultPlan: Plan = {
-        id: defaultPlanId,
-        title: "Main Plan",
+      this.logger.info(
+        `[Chat] Migrating state to multi-plan structure for ${this.id}`,
+      );
+      const migrationPlanId = "default";
+      const migrationPlan: Plan = {
+        id: migrationPlanId,
+        title: "Main Plan (Migrated)",
         stream: currentState.stream,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      this.initialState = {
-        plans: { [defaultPlanId]: defaultPlan },
-        activePlanId: defaultPlanId,
+      const newState: FluxState = {
+        plans: { [migrationPlanId]: migrationPlan },
+        activePlanId: migrationPlanId,
         events: currentState.events || [],
         workflow: currentState.workflow,
       };
 
-      // Force update state immediately to persist migration
-      this.setState(this.initialState);
-    } else {
-      const defaultPlanId = "1";
-      this.initialState = {
-        plans: {
-          [defaultPlanId]: {
-            id: defaultPlanId,
-            title: "Main Plan",
-            stream: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        },
-        activePlanId: defaultPlanId,
-        events: [],
-      };
+      this.setState(newState);
+      return newState;
     }
+
+    return currentState;
   }
 
   /**
@@ -82,23 +98,27 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * Helper to get the active plan
    */
   private getActivePlan(): Plan | null {
-    const { plans, activePlanId } = this.state;
-    if (!activePlanId || !plans[activePlanId]) return null;
-    return plans[activePlanId];
+    const currentState = this.ensureMigrated();
+    if (!currentState || !currentState.plans || !currentState.activePlanId) {
+      return null;
+    }
+    const { plans, activePlanId } = currentState;
+    return (plans[activePlanId] as Plan) || null;
   }
 
   /**
    * Helper to save updates to the active plan
    */
   private saveActivePlan(updatedPlan: Plan) {
-    const { plans, activePlanId } = this.state;
-    if (!activePlanId) return;
+    const currentState = this.state;
+    if (!currentState || !currentState.activePlanId || !currentState.plans)
+      return;
 
     this.setState({
-      ...this.state,
+      ...currentState,
       plans: {
-        ...plans,
-        [activePlanId]: updatedPlan,
+        ...currentState.plans,
+        [currentState.activePlanId]: updatedPlan,
       },
     });
   }
@@ -190,11 +210,14 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * List all plans
    */
   public listPlans() {
-    return Object.values(this.state.plans).map((p) => ({
+    const currentState = this.ensureMigrated();
+    if (!currentState || !currentState.plans) return [];
+
+    return Object.values(currentState.plans).map((p) => ({
       id: p.id,
       title: p.title,
-      isActive: p.id === this.state.activePlanId,
-      blocksCount: p.stream.length,
+      isActive: p.id === currentState.activePlanId,
+      blocksCount: p.stream?.length || 0,
     }));
   }
 
@@ -435,18 +458,15 @@ export class Chat extends AIChatAgent<Env, FluxState> {
           model,
           tools: allTools,
           onStepFinish: (step) => {
-            console.log(
-              `[Chat] Step finished. Tool calls: ${step.toolCalls.length}, Finish reason: ${step.finishReason}`,
-            );
             if (step.toolCalls.length > 0) {
-              console.log(
-                `[Chat] Tool calls made: ${step.toolCalls.map((tc) => tc.toolName).join(", ")}`,
+              this.logger.debug(
+                `[Chat] Step: ${step.finishReason}, Tools: ${step.toolCalls.map((tc) => tc.toolName).join(", ")}`,
               );
             }
           },
           onFinish: (result) => {
-            console.log(
-              `[Chat] Stream finished. Text length: ${result.text?.length || 0}, Finish reason: ${result.finishReason}`,
+            this.logger.debug(
+              `[Chat] Stream finished. Length: ${result.text?.length || 0}`,
             );
             return onFinish(result as any);
           },

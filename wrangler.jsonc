@@ -4,6 +4,9 @@
   "main": "src/server/server.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "LOG_LEVEL": "info",
+  },
   "durable_objects": {
     "bindings": [
       {

@@ -4,7 +4,7 @@ import { useAgent } from "agents/react";
 import { isStaticToolUIPart } from "ai";
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import type { UIMessage } from "@ai-sdk/react";
-import type { tools } from "./tools";
+import { tools } from "./tools";
 import type { FluxState } from "@shared";
 
 // Component imports
@@ -47,6 +47,7 @@ export default function App() {
   const [textareaHeight, setTextareaHeight] = useState("auto");
   const [mobileView, setMobileView] = useState<"timeline" | "chat">("timeline");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Flux State
   const [fluxState, setFluxState] = useState<FluxState>({
@@ -154,8 +155,8 @@ export default function App() {
         isStaticToolUIPart(part) &&
         part.state === "input-available" &&
         // Manual check inside the component
-        toolsRequiringConfirmation.includes(
-          part.type.replace("tool-", "") as keyof typeof tools,
+        (toolsRequiringConfirmation as unknown as string[]).includes(
+          part.type.replace("tool-", ""),
         ),
     ),
   );
@@ -449,10 +450,9 @@ export default function App() {
                           ) {
                             const toolCallId = part.toolCallId;
                             const toolName = part.type.replace("tool-", "");
-                            const needsConfirmation =
-                              toolsRequiringConfirmation.includes(
-                                toolName as keyof typeof tools,
-                              );
+                            const needsConfirmation = (
+                              toolsRequiringConfirmation as unknown as string[]
+                            ).includes(toolName);
 
                             return (
                               <ToolInvocationCard
@@ -509,26 +509,8 @@ export default function App() {
               }}
               className="relative flex items-end gap-2 bg-ob-base-200 rounded-2xl p-2 border border-ob-border focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500 transition-all"
             >
-              <div className="pb-1 pl-1">
-                <VoiceInput
-                  onTranscript={(transcript) => {
-                    setAgentInput((prev) => {
-                      const separator = prev.trim() ? " " : "";
-                      return prev + separator + transcript;
-                    });
-                    setTimeout(() => {
-                      const ta = document.querySelector("textarea");
-                      if (ta) {
-                        ta.style.height = "auto";
-                        ta.style.height = `${ta.scrollHeight}px`;
-                        setTextareaHeight(`${ta.scrollHeight}px`);
-                      }
-                    }, 0);
-                  }}
-                />
-              </div>
-
               <Textarea
+                ref={textareaRef}
                 disabled={pendingToolCallConfirmation}
                 placeholder={
                   pendingToolCallConfirmation
@@ -558,7 +540,24 @@ export default function App() {
                 rows={1}
               />
 
-              <div className="pb-1 pr-1">
+              <div className="pb-1 pr-1 flex items-center gap-1">
+                <VoiceInput
+                  onTranscript={(transcript) => {
+                    setAgentInput((prev) => {
+                      const separator = prev.trim() ? " " : "";
+                      return prev + separator + transcript;
+                    });
+                    setTimeout(() => {
+                      if (textareaRef.current) {
+                        textareaRef.current.style.height = "auto";
+                        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+                        setTextareaHeight(
+                          `${textareaRef.current.scrollHeight}px`,
+                        );
+                      }
+                    }, 0);
+                  }}
+                />
                 {status === "submitted" || status === "streaming" ? (
                   <Button
                     type="button"

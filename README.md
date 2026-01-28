@@ -68,6 +68,7 @@ We strictly adhere to the Cloudflare "Fast Track" requirements, leveraging the e
 ### 4. Human Enablement: Web Speech API
 
 - **Voice-to-Execution**: Integrated voice input allows users to "speak" tasks directly into existence, reducing friction to near zero.
+- **Browser Support**: This feature leverages the `Web Speech API`, which is natively supported in **Google Chrome**, **Microsoft Edge**, and **Safari**. (Note: The microphone icon will only be visible in supported browsers).
 
 ---
 
@@ -89,9 +90,21 @@ npx wrangler login
 # 2. Develop (Local)
 pnpm dev
 
-# 3. Deploy (Production)
+# 3. Environment Variables
+# Copy the example and adjust if needed
+cp .dev.vars.example .dev.vars
+
+# 4. Deploy (Production)
 pnpm run deploy
 ```
+
+### Environment Variables
+
+| Variable    | Description                                               | Default  |
+| :---------- | :-------------------------------------------------------- | :------- |
+| `LOG_LEVEL` | Set the logging level (`debug`, `info`, `warn`, `error`). | `"info"` |
+
+For production, you can set variables via the Cloudflare Dashboard.
 
 ---
 
