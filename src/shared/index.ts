@@ -28,7 +28,10 @@ export type EventType =
   | "BLOCK_SCHEDULED"
   | "BLOCK_UPDATED"
   | "BLOCK_DELETED"
-  | "TIMELINE_SHIFTED";
+  | "TIMELINE_SHIFTED"
+  | "PLAN_CREATED"
+  | "PLAN_DELETED"
+  | "PLAN_SWITCHED";
 
 export interface EventLog {
   id: string;
@@ -46,8 +49,17 @@ export interface WorkflowStatus {
   error?: string;
 }
 
-export interface FluxState {
+export interface Plan {
+  id: string;
+  title: string;
   stream: StreamBlock[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FluxState {
+  plans: Record<string, Plan>;
+  activePlanId: string | null;
   events: EventLog[];
   workflow?: WorkflowStatus;
 }

@@ -3,6 +3,10 @@ import {
   scheduleBlockSchema,
   deleteBlockSchema,
   useArchitectSchema,
+  createPlanSchema,
+  switchPlanSchema,
+  listPlansSchema,
+  deletePlanSchema,
 } from "@shared";
 
 export const tools = {
@@ -10,4 +14,8 @@ export const tools = {
   deleteBlock: deleteBlockSchema,
   updateBlock: updateBlockSchema,
   scheduleBlock: scheduleBlockSchema,
+  createPlan: createPlanSchema,
+  switchPlan: switchPlanSchema,
+  listPlans: listPlansSchema,
+  deletePlan: deletePlanSchema,
 };

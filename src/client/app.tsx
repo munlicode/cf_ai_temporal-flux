@@ -17,6 +17,7 @@ import { Textarea } from "@/components/textarea/Textarea";
 import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { ToolInvocationCard } from "@/components/tool-invocation-card/ToolInvocationCard";
 import { StreamView } from "@/components/stream/StreamView";
+import { PlanSwitcher } from "@/components/plan-switcher/PlanSwitcher";
 
 // Icon imports
 // Icon imports (explicitly imported for better tree-shaking)
@@ -45,7 +46,8 @@ export default function App() {
 
   // Flux State
   const [fluxState, setFluxState] = useState<FluxState>({
-    stream: [],
+    plans: {},
+    activePlanId: null,
     events: [],
   });
 
@@ -169,6 +171,37 @@ export default function App() {
     [sendMessage],
   );
 
+  // Plan Handlers
+  const handleSwitchPlan = useCallback(
+    async (id: string) => {
+      await sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: `Switch to plan ${id}` }],
+      });
+    },
+    [sendMessage],
+  );
+
+  const handleCreatePlan = useCallback(
+    async (title: string) => {
+      await sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: `Create a new plan called "${title}"` }],
+      });
+    },
+    [sendMessage],
+  );
+
+  const handleDeletePlan = useCallback(
+    async (id: string) => {
+      await sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: `Delete plan ${id}` }],
+      });
+    },
+    [sendMessage],
+  );
+
   // Handler for adding a task via UI button
   const handleAddClick = useCallback(() => {
     setAgentInput("Schedule task: ");
@@ -190,7 +223,15 @@ export default function App() {
               <use href="#ai:local:agents" />
             </svg>
           </div>
-          <h1 className="font-bold text-lg tracking-tight">Flux</h1>
+          <h1 className="font-bold text-lg tracking-tight mr-4">Flux</h1>
+
+          <PlanSwitcher
+            plans={fluxState.plans || {}}
+            activePlanId={fluxState.activePlanId}
+            onSwitchPlan={handleSwitchPlan}
+            onCreatePlan={handleCreatePlan}
+            onDeletePlan={handleDeletePlan}
+          />
         </div>
 
         <div className="flex items-center gap-2">
@@ -223,7 +264,12 @@ export default function App() {
         {/* Left Column: Timeline */}
         <div className="w-1/2 min-w-[400px] border-r border-ob-border bg-ob-base-100/50">
           <StreamView
-            blocks={fluxState.stream}
+            blocks={
+              fluxState.activePlanId &&
+              fluxState.plans?.[fluxState.activePlanId]
+                ? fluxState.plans[fluxState.activePlanId].stream
+                : []
+            }
             workflow={fluxState.workflow}
             onDeleteBlock={handleDeleteBlock}
           />

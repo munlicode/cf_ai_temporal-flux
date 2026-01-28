@@ -16,7 +16,7 @@ import { createWorkersAI } from "workers-ai-provider";
 import { processToolCalls, cleanupMessages } from "@shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
-import type { FluxState, StreamBlock, WorkflowStatus } from "@shared";
+import type { FluxState, StreamBlock, WorkflowStatus, Plan } from "@shared";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -30,21 +30,45 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     console.log(`[Chat] Initializing new instance: ${state.id.toString()}`);
     this.env = env;
     this.id = state.id.toString();
-    this.initialState = {
-      stream: [
-        {
-          id: "1",
-          title: "Explore Flux",
-          description: "Check out your execution timeline",
-          priority: "high",
-          tags: ["onboarding"],
-          startTime: new Date().toISOString(),
-          endTime: new Date(Date.now() + 30 * 60000).toISOString(),
-          status: "pending",
+
+    // Check for migration
+    const currentState = this.state as any;
+    if (currentState.stream && !currentState.plans) {
+      console.log(`[Chat] Migrating state to multi-plan structure`);
+      const defaultPlanId = "default";
+      const defaultPlan: Plan = {
+        id: defaultPlanId,
+        title: "Main Plan",
+        stream: currentState.stream,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      this.initialState = {
+        plans: { [defaultPlanId]: defaultPlan },
+        activePlanId: defaultPlanId,
+        events: currentState.events || [],
+        workflow: currentState.workflow,
+      };
+
+      // Force update state immediately to persist migration
+      this.setState(this.initialState);
+    } else {
+      const defaultPlanId = "1";
+      this.initialState = {
+        plans: {
+          [defaultPlanId]: {
+            id: defaultPlanId,
+            title: "Main Plan",
+            stream: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
         },
-      ],
-      events: [],
-    };
+        activePlanId: defaultPlanId,
+        events: [],
+      };
+    }
   }
 
   /**
@@ -53,13 +77,142 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   /**
    * Internal method to update state with new blocks and log the event
    */
-  public scheduleBlocks(newBlocks: StreamBlock[], reason?: string) {
+  /**
+   * Helper to get the active plan
+   */
+  private getActivePlan(): Plan | null {
+    const { plans, activePlanId } = this.state;
+    if (!activePlanId || !plans[activePlanId]) return null;
+    return plans[activePlanId];
+  }
+
+  /**
+   * Helper to save updates to the active plan
+   */
+  private saveActivePlan(updatedPlan: Plan) {
+    const { plans, activePlanId } = this.state;
+    if (!activePlanId) return;
+
+    this.setState({
+      ...this.state,
+      plans: {
+        ...plans,
+        [activePlanId]: updatedPlan,
+      },
+    });
+  }
+
+  /**
+   * Create a new plan
+   */
+  public createPlan(title: string) {
+    const id = generateId();
+    const newPlan: Plan = {
+      id,
+      title,
+      stream: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
     const currentState = this.state;
     this.setState({
       ...currentState,
-      stream: [...(currentState.stream || []), ...newBlocks],
+      plans: {
+        ...currentState.plans,
+        [id]: newPlan,
+      },
+      activePlanId: id, // Switch to new plan immediately
       events: [
         ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "PLAN_CREATED",
+          payload: { id, title },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    return newPlan;
+  }
+
+  /**
+   * Switch to a different plan
+   */
+  public switchPlan(id: string) {
+    const currentState = this.state;
+    if (!currentState.plans[id]) {
+      throw new Error(`Plan ${id} not found`);
+    }
+
+    this.setState({
+      ...currentState,
+      activePlanId: id,
+    });
+    return currentState.plans[id];
+  }
+
+  /**
+   * Delete a plan
+   */
+  public deletePlan(id: string) {
+    const currentState = this.state;
+    const { [id]: deletedPlan, ...remainingPlans } = currentState.plans;
+
+    // If deleting active plan, switch to another one
+    let nextActiveId = currentState.activePlanId;
+    if (currentState.activePlanId === id) {
+      const remainingIds = Object.keys(remainingPlans);
+      if (remainingIds.length === 0) {
+        throw new Error("Cannot delete the last plan");
+      }
+      nextActiveId = remainingIds[0];
+    }
+
+    this.setState({
+      ...currentState,
+      plans: remainingPlans,
+      activePlanId: nextActiveId,
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "PLAN_DELETED",
+          payload: { id },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+  }
+
+  /**
+   * List all plans
+   */
+  public listPlans() {
+    return Object.values(this.state.plans).map((p) => ({
+      id: p.id,
+      title: p.title,
+      isActive: p.id === this.state.activePlanId,
+      blocksCount: p.stream.length,
+    }));
+  }
+
+  public scheduleBlocks(newBlocks: StreamBlock[], reason?: string) {
+    const activePlan = this.getActivePlan();
+    if (!activePlan) return; // Should not happen
+
+    const updatedPlan = {
+      ...activePlan,
+      stream: [...activePlan.stream, ...newBlocks],
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.saveActivePlan(updatedPlan);
+
+    this.setState({
+      ...this.state,
+      events: [
+        ...(this.state.events || []),
         {
           id: generateId(),
           type: "BLOCK_SCHEDULED",
@@ -75,8 +228,10 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * Internal method to update an existing block
    */
   public updateBlockState(id: string, updates: Partial<StreamBlock>) {
-    const currentState = this.state;
-    const stream = currentState.stream || [];
+    const activePlan = this.getActivePlan();
+    if (!activePlan) return null;
+
+    const stream = activePlan.stream;
     const blockIndex = stream.findIndex((b) => b.id === id);
 
     if (blockIndex === -1) return null;
@@ -85,11 +240,18 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     const newStream = [...stream];
     newStream[blockIndex] = updatedBlock;
 
-    this.setState({
-      ...currentState,
+    const updatedPlan = {
+      ...activePlan,
       stream: newStream,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.saveActivePlan(updatedPlan);
+
+    this.setState({
+      ...this.state,
       events: [
-        ...(currentState.events || []),
+        ...(this.state.events || []),
         {
           id: generateId(),
           type: "BLOCK_UPDATED",
@@ -105,15 +267,24 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * Internal method to delete a block
    */
   public deleteBlockState(id: string) {
-    const currentState = this.state;
-    const stream = currentState.stream || [];
+    const activePlan = this.getActivePlan();
+    if (!activePlan) return;
+
+    const stream = activePlan.stream;
     const newStream = stream.filter((b) => b.id !== id);
 
-    this.setState({
-      ...currentState,
+    const updatedPlan = {
+      ...activePlan,
       stream: newStream,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.saveActivePlan(updatedPlan);
+
+    this.setState({
+      ...this.state,
       events: [
-        ...(currentState.events || []),
+        ...(this.state.events || []),
         {
           id: generateId(),
           type: "BLOCK_DELETED",
@@ -252,25 +423,26 @@ export class Chat extends AIChatAgent<Env, FluxState> {
 
 [CONTEXT]
 Today is: ${new Date().toLocaleString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })}
-Timeline: ${this.state.stream?.length || 0} active blocks.
+Timeline: ${this.getActivePlan()?.stream?.length || 0} active blocks.
 [/CONTEXT]
 
 CORE BEHAVIOR:
-1. If the user presents a GOAL (e.g., "I want to learn German"), use 'useArchitect'.
-2. If the user gives a specific task at a specific time, use 'scheduleBlock'.
-3. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
-4. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
-5. CRITICAL: You MUST always start your response with a short verbal phrase (e.g., "I'm on it.", "Scheduling that now...", "Let me structure that query...") BEFORE calling any tool. A response with ONLY a tool call is FORBIDDEN.
+1. If the user presents a major new GOAL or context (e.g., "I want to learn German"), check if a relevant plan exists; if not, suggest or use 'createPlan'.
+2. If the user wants to break down a goal WITHIN the active plan, use 'useArchitect'.
+3. If the user gives a specific task at a specific time, use 'scheduleBlock'.
+4. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
+5. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
+6. CRITICAL: You MUST always start your response with a short verbal phrase (e.g., "I'm on it.", "Scheduling that now...", "Let me structure that query...") BEFORE calling any tool. A response with ONLY a tool call is FORBIDDEN.
 
 Tools:
 - 'useArchitect': Use for projects/goals that need breaking down into steps.
 - 'scheduleBlock': For adding ANYTHING to the timeline.
 - 'updateBlock' / 'deleteBlock': For managing the timeline.
+- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': For managing multiple plans.
 `,
           messages: await convertToModelMessages(processedMessages),
           model,
           tools: allTools,
-          maxSteps: 5,
           onStepFinish: (step) => {
             console.log(
               `[Chat] Step finished. Tool calls: ${step.toolCalls.length}, Finish reason: ${step.finishReason}`,

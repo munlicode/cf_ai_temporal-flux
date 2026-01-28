@@ -40,16 +40,30 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
       .do("decompose-goal", async () => {
         console.log(`[Architect] Running AI decomposition...`);
         try {
-          return await this.env.AI.run("@cf/meta/llama-3-8b-instruct", {
-            messages: [
-              {
-                role: "system",
-                content:
-                  'You are the \'Architect\'. Break down a vague goal into 3-5 concrete, actionable tasks that will be scheduled sequentially. Return ONLY raw JSON: { "tasks": [{ "title": string, "description": string, "durationMinutes": number, "priority": \'high\'|\'medium\'|\'low\' }] }',
-              },
-              { role: "user", content: goal },
-            ],
-          });
+          return await this.env.AI.run(
+            "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+            {
+              messages: [
+                {
+                  role: "system",
+                  content: `You are the 'Architect'. Break down a vague goal into 3-5 concrete, actionable tasks that will be scheduled sequentially.
+
+Return ONLY raw JSON:
+{
+"tasks": [
+{
+"title": string,
+"description": string,
+"durationMinutes": number,
+"priority": 'high'|'medium'|'low'
+}
+]
+}`,
+                },
+                { role: "user", content: goal },
+              ],
+            },
+          );
         } catch (error: any) {
           console.error(`[Architect] AI.run failed:`, error);
           throw new Error(`AI.run failed: ${error.message || error}`);

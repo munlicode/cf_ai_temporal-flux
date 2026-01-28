@@ -6,6 +6,10 @@ import {
   updateBlockSchema,
   deleteBlockSchema,
   useArchitectSchema,
+  createPlanSchema,
+  switchPlanSchema,
+  listPlansSchema,
+  deletePlanSchema,
 } from "@shared";
 
 /**
@@ -91,11 +95,66 @@ const useArchitect = tool({
 /**
  * Export core tools
  */
+const createPlan = tool({
+  description: createPlanSchema.description,
+  inputSchema: createPlanSchema.parameters,
+  execute: async ({ title }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const plan = agent!.createPlan(title);
+    return `Created plan "${plan.title}" (ID: ${plan.id}) and switched to it.`;
+  },
+});
+
+const switchPlan = tool({
+  description: switchPlanSchema.description,
+  inputSchema: switchPlanSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    try {
+      const plan = agent!.switchPlan(id);
+      return `Switched to plan "${plan.title}" (ID: ${plan.id}).`;
+    } catch (e: any) {
+      return `Failed to switch plan: ${e.message}`;
+    }
+  },
+});
+
+const listPlans = tool({
+  description: listPlansSchema.description,
+  inputSchema: listPlansSchema.parameters,
+  execute: async () => {
+    const { agent } = getCurrentAgent<Chat>();
+    const plans = agent!.listPlans();
+    return `Available plans:\n${plans.map((p) => `- ${p.title} (ID: ${p.id}) ${p.isActive ? "[ACTIVE]" : ""} [${p.blocksCount} blocks]`).join("\n")}`;
+  },
+});
+
+const deletePlan = tool({
+  description: deletePlanSchema.description,
+  inputSchema: deletePlanSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    try {
+      agent!.deletePlan(id);
+      return `Deleted plan ${id}.`;
+    } catch (e: any) {
+      return `Failed to delete plan: ${e.message}`;
+    }
+  },
+});
+
+/**
+ * Export core tools
+ */
 export const tools = {
   scheduleBlock,
   updateBlock,
   deleteBlock,
   useArchitect,
+  createPlan,
+  switchPlan,
+  listPlans,
+  deletePlan,
 } satisfies ToolSet;
 
 /**

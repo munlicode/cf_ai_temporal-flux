@@ -63,6 +63,36 @@ export const useArchitectSchema = {
 };
 
 /**
+ * Plan Management Tools
+ */
+
+export const createPlanSchema = {
+  description: "Create a new execution plan (timeline)",
+  parameters: z.object({
+    title: z.string().describe("The comprehensive title of the new plan"),
+  }),
+};
+
+export const switchPlanSchema = {
+  description: "Switch to a different execution plan",
+  parameters: z.object({
+    id: z.string().describe("The ID of the plan to switch to"),
+  }),
+};
+
+export const listPlansSchema = {
+  description: "List all available execution plans",
+  parameters: z.object({}),
+};
+
+export const deletePlanSchema = {
+  description: "Delete an execution plan",
+  parameters: z.object({
+    id: z.string().describe("The ID of the plan to delete"),
+  }),
+};
+
+/**
  * List of tools that require human confirmation before execution.
  * This can be used by the UI to show an approval step.
  */

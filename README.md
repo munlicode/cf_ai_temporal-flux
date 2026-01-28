@@ -2,6 +2,8 @@
 
 **Build a step-by-step roadmap from any idea.**
 
+[**Live Demo → flux.kreoza.com**](https://flux.kreoza.com)
+
 Flux is an AI-powered app that breaks down an idea into an actionable plan showing step-by-step action. You can use it just by sending a message like `I want to learn German`.
 
 Try any of these examples to see it in action:
