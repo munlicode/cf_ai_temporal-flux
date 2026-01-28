@@ -3,7 +3,7 @@ import {
   scheduleBlockSchema,
   deleteBlockSchema,
   useArchitectSchema,
-} from "../shared";
+} from "@shared";
 
 export const tools = {
   useArchitect: useArchitectSchema,
