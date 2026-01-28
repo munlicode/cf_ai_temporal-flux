@@ -29,6 +29,8 @@ import { Sun as SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { PaperPlaneTilt as PaperPlaneTiltIcon } from "@phosphor-icons/react/dist/ssr/PaperPlaneTilt";
 import { Stop as StopIcon } from "@phosphor-icons/react/dist/ssr/Stop";
+import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
+import { ChatCircle as ChatIcon } from "@phosphor-icons/react/dist/ssr/ChatCircle";
 
 import { TOOLS_REQUIRING_CONFIRMATION } from "@shared";
 
@@ -43,6 +45,7 @@ export default function App() {
   });
   const [showDebug, setShowDebug] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState("auto");
+  const [mobileView, setMobileView] = useState<"timeline" | "chat">("timeline");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Flux State
@@ -212,9 +215,9 @@ export default function App() {
   return (
     <div className="h-screen w-full flex flex-col bg-ob-base-200 text-ob-text-primary overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-3 border-b border-ob-border flex items-center justify-between bg-ob-base-100 z-20 shadow-sm h-14 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center p-1 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+      <div className="px-3 md:px-6 py-2 md:py-3 border-b border-ob-border flex items-center justify-between bg-ob-base-100 z-20 shadow-sm h-14 shrink-0">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="shrink-0 flex items-center justify-center p-1 rounded-lg bg-orange-100 dark:bg-orange-900/30">
             <svg
               width="24px"
               height="24px"
@@ -224,7 +227,9 @@ export default function App() {
               <use href="#ai:local:agents" />
             </svg>
           </div>
-          <h1 className="font-bold text-lg tracking-tight mr-4">Flux</h1>
+          <h1 className="font-bold text-base md:text-lg tracking-tight mr-1 md:mr-4 hidden sm:block">
+            Flux
+          </h1>
 
           <PlanSwitcher
             plans={fluxState.plans || {}}
@@ -235,8 +240,36 @@ export default function App() {
           />
         </div>
 
+        {/* Mobile View Switcher */}
+        <div className="flex md:hidden bg-ob-base-200 rounded-lg p-0.5 border border-ob-border mx-1">
+          <button
+            type="button"
+            onClick={() => setMobileView("timeline")}
+            className={`flex items-center gap-1.5 px-2 md:px-3 py-1 transparent text-[10px] md:text-xs font-semibold rounded-md transition-all ${
+              mobileView === "timeline"
+                ? "bg-ob-base-100 text-ob-text-primary shadow-sm"
+                : "text-ob-text-secondary hover:text-ob-text-primary"
+            }`}
+          >
+            <ListIcon size={16} />
+            <span className="hidden min-[360px]:inline">Timeline</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileView("chat")}
+            className={`flex items-center gap-1.5 px-2 md:px-3 py-1 transparent text-[10px] md:text-xs font-semibold rounded-md transition-all ${
+              mobileView === "chat"
+                ? "bg-ob-base-100 text-ob-text-primary shadow-sm"
+                : "text-ob-text-secondary hover:text-ob-text-primary"
+            }`}
+          >
+            <ChatIcon size={16} />
+            <span className="hidden min-[360px]:inline">Copilot</span>
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 mr-2 px-3 py-1 bg-ob-base-200 rounded-full border border-ob-border">
+          <div className="hidden md:flex items-center gap-2 mr-2 px-3 py-1 bg-ob-base-200 rounded-full border border-ob-border">
             <BugIcon size={14} className="text-ob-text-secondary" />
             <span className="text-xs font-medium text-ob-text-secondary mr-1">
               Debug
@@ -260,10 +293,14 @@ export default function App() {
         </div>
       </div>
 
-      {/* 2-Column Layout */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Responsive Content Layout */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Left Column: Timeline */}
-        <div className="w-1/2 min-w-[400px] border-r border-ob-border bg-ob-base-100/50">
+        <div
+          className={`flex-1 md:w-1/2 md:min-w-[400px] border-r border-ob-border bg-ob-base-100/50 ${
+            mobileView === "timeline" ? "flex" : "hidden md:flex"
+          } flex-col overflow-hidden`}
+        >
           <StreamView
             blocks={
               fluxState.activePlanId &&
@@ -277,7 +314,11 @@ export default function App() {
         </div>
 
         {/* Right Column: Chat (Copilot) */}
-        <div className="flex-1 flex flex-col min-w-[400px] bg-ob-base-100 relative">
+        <div
+          className={`flex-1 flex flex-col md:min-w-[400px] bg-ob-base-100 relative ${
+            mobileView === "chat" ? "flex" : "hidden md:flex"
+          }`}
+        >
           {/* Header for Chat */}
           <div className="px-6 py-4 border-b border-ob-border flex justify-between items-center bg-ob-base-100/80 backdrop-blur-md sticky top-0 z-10">
             <div className="flex items-center gap-3">

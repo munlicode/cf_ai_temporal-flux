@@ -77,11 +77,11 @@ export function StreamView({
   return (
     <div className="flex flex-col h-full bg-ob-base-200/30">
       <div className="p-4 border-b border-ob-border flex justify-between items-center bg-ob-base-100/50 backdrop-blur-sm sticky top-0 z-10">
-        <h2 className="font-semibold text-lg text-ob-text-primary flex items-center gap-2">
+        <h2 className="font-semibold text-base md:text-lg text-ob-text-primary flex items-center gap-2">
           <CalendarDotsIcon className="text-brand-500" size={20} />
-          Execution Timeline
+          <span className="md:inline">Timeline</span>
         </h2>
-        <span className="text-xs text-ob-text-secondary bg-ob-base-200 px-2 py-1 rounded-full border border-ob-border">
+        <span className="hidden sm:inline text-xs text-ob-text-secondary bg-ob-base-200 px-2 py-1 rounded-full border border-ob-border">
           Roadmap
         </span>
       </div>
@@ -95,7 +95,7 @@ export function StreamView({
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
         {/* Timeline Line */}
-        <div className="absolute left-[54px] top-4 bottom-4 w-px bg-ob-border/50" />
+        <div className="absolute left-[38px] md:left-[54px] top-4 bottom-4 w-px bg-ob-border/50" />
 
         {sortedBlocks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-ob-text-secondary opacity-60">
@@ -112,7 +112,7 @@ export function StreamView({
                   key={`now-${index}`}
                   className="relative pl-16 py-2 flex items-center gap-2"
                 >
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-black text-brand-500 bg-brand-500/10 px-1 py-0.5 rounded border border-brand-500/20 z-10 w-12 text-center tracking-tight">
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-black text-brand-500 bg-brand-500/10 px-1 py-0.5 rounded border border-brand-500/20 z-10 w-10 md:w-12 text-center tracking-tight">
                     NOW
                   </div>
                   <div className="flex-1 h-px bg-brand-500/50 relative shadow-[0_0_8px_rgba(244,129,32,0.5)]">
@@ -130,9 +130,9 @@ export function StreamView({
             );
 
             return (
-              <div key={block.id} className="relative pl-16 group">
+              <div key={block.id} className="relative pl-12 md:pl-16 group">
                 {/* Time Indicator */}
-                <div className="absolute left-0 top-0 text-[10px] font-mono text-ob-text-secondary bg-ob-base-100 px-1 rounded border border-ob-border z-10 w-12 text-center">
+                <div className="absolute left-0 top-0 text-[10px] font-mono text-ob-text-secondary bg-ob-base-100 px-1 rounded border border-ob-border z-10 w-10 md:w-12 text-center">
                   {startTime.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",

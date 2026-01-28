@@ -41,7 +41,7 @@ export function PlanSwitcher({
         className="flex items-center gap-2 font-medium text-sm px-2 h-9"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="truncate max-w-[150px]">
+        <span className="truncate max-w-[80px] md:max-w-[150px] hidden min-[400px]:inline">
           {activePlan ? activePlan.title : "Select Plan"}
         </span>
         {isOpen ? <CaretUp size={14} /> : <CaretDown size={14} />}
