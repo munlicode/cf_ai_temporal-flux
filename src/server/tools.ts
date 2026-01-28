@@ -13,8 +13,9 @@ import {
   scheduleBlockSchema,
   updateTaskSchema,
   deleteTaskSchema,
+  useStrategistSchema,
   type FluxState,
-} from "@flux/shared";
+} from "../shared";
 
 /**
  * Weather information tool that requires human confirmation
@@ -87,7 +88,11 @@ const scheduleBlock = tool({
     const endTime = normalizeTime(block.endTime);
 
     // Create ephemeral ID if no backlog task is provided
-    const taskId = block.taskId || crypto.randomUUID();
+    // Sanitize: AI sometimes passes "null" or empty strings
+    const taskId =
+      block.taskId && block.taskId !== "null" && block.taskId !== ""
+        ? block.taskId
+        : crypto.randomUUID();
 
     const newBlock = {
       id: crypto.randomUUID(),
@@ -289,6 +294,27 @@ const cancelScheduledTask = tool({
   },
 });
 
+const useStrategist = tool({
+  description: useStrategistSchema.description,
+  inputSchema: useStrategistSchema.parameters,
+  execute: async ({ goal }: { goal: string }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    // Use the agent id as userId
+    const userId = agent!.id;
+
+    // Trigger workflow
+    try {
+      await (agent! as any).env.STRATEGIST.create({
+        payload: { goal, userId },
+      });
+      return "Strategist Workflow started. I'll break down this goal and add tasks to your backlog shortly.";
+    } catch (error) {
+      console.error("Error triggering strategist workflow", error);
+      return `Failed to trigger strategist: ${error}`;
+    }
+  },
+});
+
 /**
  * Export all available tools
  */
@@ -299,6 +325,7 @@ export const tools = {
   scheduleBlock,
   updateTask,
   deleteTask,
+  useStrategist,
   // scheduleTask, // Disable old scheduler for now to avoid confusion
   getScheduledTasks,
   cancelScheduledTask,

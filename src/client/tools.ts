@@ -8,7 +8,7 @@ import {
   scheduleBlockSchema,
   updateTaskSchema,
   deleteTaskSchema,
-} from "@flux/shared";
+} from "../shared";
 
 export const tools = {
   getWeatherInformation: getWeatherInformationSchema,

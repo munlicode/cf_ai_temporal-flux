@@ -1,5 +1,5 @@
 import { Card } from "@/components/card/Card";
-import type { TaskItem } from "@flux/shared";
+import type { TaskItem } from "@shared";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/button/Button";
 

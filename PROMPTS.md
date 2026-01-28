@@ -88,3 +88,7 @@ This file logs significant AI prompts used to generate core logic, architecture,
 3. Implemented logic to append transcribed text to the existing input and auto-resize the textarea.
 4. Resolved TypeScript errors regarding the missing `SpeechRecognition` types on the `window` object.
 5. Cleaned up duplicate imports and component structure in `App.tsx`.
+
+### Migration to single app structure
+
+**Prompt:** `Migrate to unified architecture instead of monorepo to leverage workers capabilities and simple deployment.`

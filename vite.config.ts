@@ -5,19 +5,24 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  root: "./",
   plugins: [cloudflare(), react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./src/client"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
     },
   },
-  server: {
-    proxy: {
-      "/check-open-ai-key": "http://localhost:8787",
-      "/agents": {
-        target: "http://localhost:8787",
-        ws: true,
-      },
-    },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
   },
+  // server: {
+  //   proxy: {
+  //     "/agents": {
+  //       target: "http://localhost:8787",
+  //       ws: true,
+  //     },
+  //   },
+  // },
 });

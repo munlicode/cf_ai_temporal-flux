@@ -46,7 +46,18 @@ export const addToBacklogSchema = {
       .optional()
       .describe("Additional details about the task"),
     priority: z.enum(["high", "medium", "low"]).default("medium"),
-    tags: z.array(z.string()).optional(),
+    tags: z
+      .preprocess((val) => {
+        if (typeof val === "string") {
+          try {
+            return JSON.parse(val);
+          } catch {
+            return val;
+          }
+        }
+        return val;
+      }, z.array(z.string()))
+      .optional(),
   }),
 };
 
@@ -57,7 +68,9 @@ export const scheduleBlockSchema = {
     taskId: z
       .string()
       .optional()
-      .describe("ID of an existing backlog task if applicable"),
+      .describe(
+        "ID of an existing backlog task. IMPORTANT: Leave empty or omit if this is a new task without an existing ID. Do NOT pass 'null' as a string.",
+      ),
     startTime: z
       .string()
       .describe("ISO 8601 start time (e.g., 2024-01-27T20:00:00)"),
@@ -74,7 +87,18 @@ export const updateTaskSchema = {
         title: z.string().optional(),
         description: z.string().optional(),
         priority: z.enum(["high", "medium", "low"]).optional(),
-        tags: z.array(z.string()).optional(),
+        tags: z
+          .preprocess((val) => {
+            if (typeof val === "string") {
+              try {
+                return JSON.parse(val);
+              } catch {
+                return val;
+              }
+            }
+            return val;
+          }, z.array(z.string()))
+          .optional(),
       })
       .describe("The fields to update"),
   }),
@@ -85,5 +109,13 @@ export const deleteTaskSchema = {
     "Delete a task from the backlog and remove all its scheduled blocks",
   parameters: z.object({
     id: z.string().describe("The ID of the task to delete"),
+  }),
+};
+
+export const useStrategistSchema = {
+  description:
+    "Trigger 'The Strategist' workflow to break down a vague goal into concrete tasks.",
+  parameters: z.object({
+    goal: z.string().describe("The high-level goal to decompose"),
   }),
 };

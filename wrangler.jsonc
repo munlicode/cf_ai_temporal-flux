@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cf-ai-temporal-flux-worker",
-  "main": "src/server.ts",
+  "name": "cf-ai-temporal-flux",
+  "main": "src/server/server.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
   "durable_objects": {
@@ -21,7 +21,15 @@
   "ai": {
     "binding": "AI",
   },
+  "workflows": [
+    {
+      "name": "strategist",
+      "binding": "STRATEGIST",
+      "class_name": "StrategistWorkflow",
+    },
+  ],
   "observability": {
     "enabled": true,
   },
+  "pages_build_output_dir": "dist",
 }

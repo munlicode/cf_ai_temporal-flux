@@ -18,7 +18,7 @@ I had an idea to create an app that would assist with my daily life. The one tha
 
 - **Edge Backend:** Cloudflare Workers + Hono.
 - **State:** Cloudflare Durable Objects (Real-time sync + Event Sourcing).
-- **AI:** Workers AI (`llama-3-8b-instruct`).
+- **AI:** Workers AI (`llama-3.3-70b-instruct-fp8-fast`).
 - **Frontend:** React + shadcn/ui + TailwindCSS.
 
 ## ⚙️ Quick Start
@@ -35,17 +35,13 @@ pnpm dev
 pnpm run deploy
 ```
 
-## Monorepo Decision
-Decision on making it monorepo with pnpm as package manager, powered with turbo is to separate concern of backend and client, while keeping development as simple as possible.
-
-
 ## 🤖 AI Assisted
 
 This project is built with AI assistance. Significant prompts and logic generations are documented in [PROMPTS.md](./PROMPTS.md).
 
 ## P.S.
-Some parts of repo might not be clear or designed well. Unfortunately, I was not able to comprehend the idea to the extend where it would be clear to me what is needed and what not. 
 
+Some parts of repo might not be clear or designed well. Unfortunately, I was not able to comprehend the idea to the extend where it would be clear to me what is needed and what not.
 
 ## Gratitude
 

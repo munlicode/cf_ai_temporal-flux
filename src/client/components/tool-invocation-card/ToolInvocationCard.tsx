@@ -3,7 +3,7 @@ import type { ToolUIPart } from "ai";
 import { RobotIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
-import { APPROVAL } from "@flux/shared";
+import { APPROVAL } from "@shared";
 
 interface ToolResultWithContent {
   content: Array<{ type: string; text: string }>;

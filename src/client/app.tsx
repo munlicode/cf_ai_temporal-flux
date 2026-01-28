@@ -5,7 +5,7 @@ import { isStaticToolUIPart } from "ai";
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import type { UIMessage } from "@ai-sdk/react";
 import type { tools } from "./tools";
-import type { FluxState } from "@flux/shared";
+import type { FluxState } from "../shared";
 
 // Component imports
 import { Button } from "@/components/button/Button";

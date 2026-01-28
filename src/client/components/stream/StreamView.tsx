@@ -1,5 +1,5 @@
 import { Card } from "@/components/card/Card";
-import type { StreamBlock, TaskItem } from "@flux/shared";
+import type { StreamBlock, TaskItem } from "@shared";
 import { ClockIcon, CalendarDotsIcon, TrashIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/button/Button";
 

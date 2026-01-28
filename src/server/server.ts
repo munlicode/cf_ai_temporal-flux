@@ -13,10 +13,10 @@ import {
   type ToolSet,
 } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
-import { processToolCalls, cleanupMessages } from "@flux/shared";
+import { processToolCalls, cleanupMessages } from "../shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
-import type { FluxState } from "@flux/shared";
+import type { FluxState } from "../shared";
 import { getSchedulePrompt } from "agents/schedule";
 
 /**
@@ -24,10 +24,12 @@ import { getSchedulePrompt } from "agents/schedule";
  */
 export class Chat extends AIChatAgent<Env, FluxState> {
   env: Env;
+  id: string;
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     this.env = env;
+    this.id = state.id.toString();
     this.initialState = {
       backlog: [
         {
@@ -153,6 +155,8 @@ Tools Available:
 /**
  * Worker entry point that routes incoming requests to the appropriate handler
  */
+export { StrategistWorkflow } from "./workflow";
+
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
     try {
