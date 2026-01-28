@@ -4,14 +4,36 @@
 
 [**Live Demo → flux.kreoza.com**](https://flux.kreoza.com)
 
-Flux is an AI-powered app that breaks down an idea into an actionable plan showing step-by-step action. You can use it just by sending a message like `I want to learn German`.
+---
 
-Try any of these examples to see it in action:
+### 🚀 What you can do
+
+Flux understands natural language. You can talk to it like a project manager or a coworker.
+
+#### 1. Architect a Goal
+
+Break down a vague intent into a concrete sequence of tasks.
 
 - `I want to learn German`
 - `I want to launch a SaaS landing page using Cloudflare`
 - `I want to build a fitness routine for the next 30 days`
-- `I want to write a technical blog post about Durable Objects`
+
+#### 2. Dynamic Scheduling
+
+Add or modify tasks directly on your timeline.
+
+- `Schedule workout tomorrow at 8am`
+- `Remind me to buy milk at 6pm`
+- `Change my 3pm meeting to be high priority`
+- `Delete the task about German grammar`
+
+#### 3. Contextual Plans
+
+Manage multiple separate timelines for different parts of your life.
+
+- `Create a new plan for my Summer Vacation`
+- `Switch to my 'Project Alpha' plan`
+- `List all my active plans`
 
 ---
 

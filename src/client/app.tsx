@@ -18,6 +18,7 @@ import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { ToolInvocationCard } from "@/components/tool-invocation-card/ToolInvocationCard";
 import { StreamView } from "@/components/stream/StreamView";
 import { PlanSwitcher } from "@/components/plan-switcher/PlanSwitcher";
+import { CommandInfo } from "@/components/command-info/CommandInfo";
 
 // Icon imports
 // Icon imports (explicitly imported for better tree-shaking)
@@ -290,15 +291,18 @@ export default function App() {
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              shape="square"
-              className="text-ob-text-secondary hover:text-red-500 hover:bg-red-500/10"
-              onClick={clearHistory}
-            >
-              <TrashIcon size={18} />
-            </Button>
+            <div className="flex items-center gap-2">
+              <CommandInfo />
+              <Button
+                variant="ghost"
+                size="sm"
+                shape="square"
+                className="text-ob-text-secondary hover:text-red-500 hover:bg-red-500/10"
+                onClick={clearHistory}
+              >
+                <TrashIcon size={18} />
+              </Button>
+            </div>
           </div>
 
           {/* Messages Area */}
