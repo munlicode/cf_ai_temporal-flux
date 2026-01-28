@@ -37,7 +37,7 @@ Manage multiple separate timelines for different parts of your life.
 
 ---
 
-## ❤️ Why
+## 🌱 Why
 
 I had an idea for an app that would assist with my daily life—reminding me of promises, adjusting for me, and helping me be a better version of myself. I've focused this assignment on the part of that vision that is most clear: turning vague goals into concrete execution plans.
 
