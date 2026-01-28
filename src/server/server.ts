@@ -16,7 +16,7 @@ import { createWorkersAI } from "workers-ai-provider";
 import { processToolCalls, cleanupMessages } from "@shared";
 import { tools, executions } from "./tools";
 import { validateEnv, type Env } from "./config";
-import type { FluxState, StreamBlock } from "@shared";
+import type { FluxState, StreamBlock, WorkflowStatus } from "@shared";
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -125,6 +125,33 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   }
 
   /**
+   * Internal method to update workflow status
+   */
+  public setWorkflowStatus(status: Partial<WorkflowStatus>) {
+    const currentState = this.state;
+    this.setState({
+      ...currentState,
+      workflow: {
+        id: generateId(),
+        status: "idle",
+        progress: 0,
+        ...(currentState.workflow || {}),
+        ...status,
+      },
+      events: [
+        ...(currentState.events || []),
+        {
+          id: generateId(),
+          type: "TIMELINE_SHIFTED", // We reuse this or could add WORKFLOW_UPDATED
+          payload: status,
+          timestamp: new Date().toISOString(),
+          reason: "Workflow status update",
+        },
+      ],
+    });
+  }
+
+  /**
    * Method called by the ArchitectWorkflow to push results into the state
    */
   async addTasksFromWorkflow(tasks: any[]) {
@@ -152,6 +179,31 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     });
 
     this.scheduleBlocks(newBlocks, "Architect workflow completed");
+
+    // Reset workflow status
+    this.setWorkflowStatus({
+      status: "completed",
+      progress: 100,
+      message: "Plan synchronized!",
+    });
+
+    // Auto-dismiss after 10 seconds
+    const currentWorkflowId = this.state.workflow?.id;
+    if (currentWorkflowId) {
+      // @ts-ignore
+      this.ctx.waitUntil(
+        new Promise((resolve) => setTimeout(resolve, 10000)).then(() => {
+          // Only dismiss if it's still the same workflow and completed
+          if (
+            this.state.workflow?.id === currentWorkflowId &&
+            this.state.workflow?.status === "completed"
+          ) {
+            this.setWorkflowStatus({ status: "idle", progress: 0 });
+          }
+        }),
+      );
+    }
+
     return { success: true };
   }
 
@@ -204,11 +256,11 @@ Timeline: ${this.state.stream?.length || 0} active blocks.
 [/CONTEXT]
 
 CORE BEHAVIOR:
-1. If the user presents a GOAL (e.g., "I want to learn German"), IMMEDIATELY use 'useArchitect'.
+1. If the user presents a GOAL (e.g., "I want to learn German"), use 'useArchitect'.
 2. If the user gives a specific task at a specific time, use 'scheduleBlock'.
 3. For simple additions to the timeline without a time, assume they want it "next" and use 'scheduleBlock' with a suggested time.
 4. You are an EXECUTION AGENT. Don't just talk—use tools to manifest the timeline.
-5. IMMUTABLE RULE: Always provide a brief verbal acknowledgement (e.g., "Architecting your plan...") whenever you use a tool. Never respond with an empty segment.
+5. CRITICAL: You MUST always start your response with a short verbal phrase (e.g., "I'm on it.", "Scheduling that now...", "Let me structure that query...") BEFORE calling any tool. A response with ONLY a tool call is FORBIDDEN.
 
 Tools:
 - 'useArchitect': Use for projects/goals that need breaking down into steps.

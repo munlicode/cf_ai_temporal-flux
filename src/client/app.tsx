@@ -215,6 +215,7 @@ export default function App() {
         <div className="w-1/2 min-w-[400px] border-r border-ob-border bg-ob-base-100/50">
           <StreamView
             blocks={fluxState.stream}
+            workflow={fluxState.workflow}
             onDeleteBlock={handleDeleteBlock}
           />
         </div>
@@ -288,15 +289,43 @@ export default function App() {
 
                     <div className="flex flex-col gap-1 w-full">
                       {showDebug && (
-                        <pre className="text-[10px] text-ob-text-secondary/50 overflow-x-auto bg-ob-base-200/50 p-2 rounded-lg border border-ob-border mb-1 max-w-full">
-                          {JSON.stringify(m, null, 2)}
-                        </pre>
+                        <div className="flex flex-col gap-2 mb-2">
+                          <div className="flex items-center gap-2 text-[10px] text-ob-text-secondary/60 font-mono uppercase tracking-widest bg-ob-base-200/50 px-2 py-1 rounded border border-ob-border w-fit">
+                            <BugIcon size={10} />
+                            Debug info
+                          </div>
+                          <pre className="text-[10px] text-ob-text-secondary/50 overflow-x-auto bg-ob-base-200/50 p-2.5 rounded-lg border border-ob-border max-w-full font-mono">
+                            {JSON.stringify(m, null, 2)}
+                          </pre>
+                        </div>
                       )}
 
                       {/* Message Content */}
                       <div className="flex flex-col gap-2">
                         {m.parts?.map((part, i) => {
                           if (part.type === "text") {
+                            let textContent = part.text;
+
+                            // If text is empty, try to derive content from tool outputs
+                            if (!textContent || textContent.trim() === "") {
+                              const toolOutputs = m.parts
+                                .filter(
+                                  (p) =>
+                                    isStaticToolUIPart(p) &&
+                                    p.state === "output-available" &&
+                                    typeof p.output === "string",
+                                )
+                                // @ts-ignore
+                                .map((p) => p.output as string);
+
+                              if (toolOutputs.length > 0) {
+                                textContent = toolOutputs.join("\n\n");
+                              }
+                            }
+
+                            if (!textContent || textContent.trim() === "")
+                              return null;
+
                             return (
                               <Card
                                 key={`${m.id}-${i}`}
@@ -308,7 +337,7 @@ export default function App() {
                               >
                                 <MemoizedMarkdown
                                   id={`${m.id}-${i}`}
-                                  content={part.text}
+                                  content={textContent}
                                 />
                               </Card>
                             );

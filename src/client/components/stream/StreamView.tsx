@@ -7,13 +7,20 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/button/Button";
 import { useEffect, useState, useMemo } from "react";
+import { WorkflowProgressBar } from "./WorkflowProgressBar";
+import type { WorkflowStatus } from "@shared";
 
 interface StreamViewProps {
   blocks: StreamBlock[];
+  workflow?: WorkflowStatus;
   onDeleteBlock: (id: string) => void;
 }
 
-export function StreamView({ blocks, onDeleteBlock }: StreamViewProps) {
+export function StreamView({
+  blocks,
+  workflow,
+  onDeleteBlock,
+}: StreamViewProps) {
   const [now, setNow] = useState(new Date());
 
   // Update 'now' every minute
@@ -33,7 +40,6 @@ export function StreamView({ blocks, onDeleteBlock }: StreamViewProps) {
     [blocks],
   );
 
-  // Group blocks by date
   const blocksWithNowLine = useMemo(() => {
     const result: (StreamBlock | { type: "now-line"; time: Date })[] = [
       ...sortedBlocks,
@@ -59,6 +65,15 @@ export function StreamView({ blocks, onDeleteBlock }: StreamViewProps) {
     return result;
   }, [sortedBlocks, now]);
 
+  const [dismissedWorkflowId, setDismissedWorkflowId] = useState<string | null>(
+    null,
+  );
+
+  const shouldShowProgressBar =
+    workflow &&
+    workflow.status !== "idle" &&
+    workflow.id !== dismissedWorkflowId;
+
   return (
     <div className="flex flex-col h-full bg-ob-base-200/30">
       <div className="p-4 border-b border-ob-border flex justify-between items-center bg-ob-base-100/50 backdrop-blur-sm sticky top-0 z-10">
@@ -70,6 +85,13 @@ export function StreamView({ blocks, onDeleteBlock }: StreamViewProps) {
           Roadmap
         </span>
       </div>
+
+      {shouldShowProgressBar && (
+        <WorkflowProgressBar
+          workflow={workflow}
+          onDismiss={() => setDismissedWorkflowId(workflow.id)}
+        />
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
         {/* Timeline Line */}
