@@ -21,15 +21,6 @@ export function WorkflowProgressBar({
 
   return (
     <div className="w-full bg-ob-base-100 border-b border-ob-border p-4 animate-in fade-in slide-in-from-top duration-300 relative group">
-      {canDismiss && onDismiss && (
-        <button
-          onClick={onDismiss}
-          className="absolute right-2 top-2 p-1 text-ob-text-secondary hover:text-ob-text-primary hover:bg-ob-base-200 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-          aria-label="Dismiss"
-        >
-          <XIcon size={14} />
-        </button>
-      )}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center text-xs font-medium">
           <div className="flex items-center gap-2">
@@ -42,7 +33,21 @@ export function WorkflowProgressBar({
               {message || (isCompleted ? "Goal decomposed!" : "Processing...")}
             </span>
           </div>
-          <span className="text-ob-text-secondary">{progress}%</span>
+
+          <div className="flex items-center gap-3">
+            <span className="text-ob-text-secondary tabular-nums">
+              {progress}%
+            </span>
+            {canDismiss && onDismiss && (
+              <button
+                onClick={onDismiss}
+                className="p-1 text-ob-text-secondary hover:text-ob-text-primary hover:bg-ob-base-300 rounded-md transition-all active:scale-95"
+                aria-label="Dismiss"
+              >
+                <XIcon size={14} weight="bold" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="w-full h-1.5 bg-ob-base-300 rounded-full overflow-hidden">
