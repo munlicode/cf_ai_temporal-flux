@@ -1,4 +1,6 @@
-[![feat: The Penguin's Path — A visual metaphor for the mission behind Flux.](https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg)](https://www.youtube.com/watch?v=DUWftlenTGc)
+<a href="https://www.youtube.com/watch?v=DUWftlenTGc" target="_blank">
+  <img src="https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg" alt="Cloudflare Penguin: A Journey Through Time" />
+</a>
 
 # Flux
 
