@@ -1,15 +1,22 @@
-<a href="https://www.youtube.com/watch?v=DUWftlenTGc" target="_blank">
-  <img src="https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg" alt="Cloudflare Penguin: A Journey Through Time" />
-</a>
-
 # Flux
 
 **Build a step-by-step roadmap from any idea.**
 
 [**Live Demo → flux.kreoza.com**](https://flux.kreoza.com)
-
 ---
 
+<details>
+<summary>🎬 <b>Bonus: View the "Penguin's Path" Mission Video</b></summary>
+<br>
+
+[![Cloudflare Penguin: A Journey Through Time](https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg)](https://www.youtube.com/watch?v=DUWftlenTGc)
+
+> *This video is a creative bonus to the assignment.* 🐧
+> 
+> [!TIP] Click the image above to watch. (Cmd/Ctrl + Click to open in a new tab).*
+</details>
+
+---
 ### 🚀 What you can do
 
 Flux understands natural language. You can talk to it like a project manager or a coworker.
