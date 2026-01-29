@@ -1,3 +1,5 @@
+[![feat: The Penguin's Path — A visual metaphor for the mission behind Flux.](https://img.youtube.com/vi/DUWftlenTGc/hqdefault.jpg)](https://www.youtube.com/embed/DUWftlenTGc)
+
 # Flux
 
 **Build a step-by-step roadmap from any idea.**
