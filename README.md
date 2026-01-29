@@ -3,18 +3,6 @@
 **Build a step-by-step roadmap from any idea.**
 
 [**Live Demo → flux.kreoza.com**](https://flux.kreoza.com)
----
-
-<details>
-<summary>🎬 <b>Bonus: View the "Penguin's Path" Mission Video</b></summary>
-<br>
-
-[![Cloudflare Penguin: A Journey Through Time](https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg)](https://www.youtube.com/watch?v=DUWftlenTGc)
-
-> *This video is a creative bonus to the assignment.* 🐧
-> 
-> [!TIP] Click the image above to watch. (Cmd/Ctrl + Click to open in a new tab).*
-</details>
 
 ---
 ### 🚀 What you can do
@@ -56,6 +44,20 @@ Most of the time, we want to do something, but we just tell ourselves **'Later'*
 
 To break it, the first step must be a 'quick start'—a way to turn that quiet intent into a loud commitment. For that, you need a plan that feels inevitable. But a plan alone isn't enough; most people fail because their **'Strategy'** (what to do) never actually meets their **'Execution'** (when to do it). Flux bridges this gap by merging them into a single reality: **The Execution Timeline**.
 
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=DUWftlenTGc">
+    <img src="https://img.youtube.com/vi/DUWftlenTGc/maxresdefault.jpg" width="500" alt="Cloudflare Penguin: A Journey Through Time">
+  </a>
+  <br>
+  <span><b>Cloudflare Penguin: A Journey Through Time</b></span>
+  <br>
+  <br>
+  <b>🎬 ✨ Bonus: This video is a creative bonus to the assignment. 🐧</b>
+</p>
+
+> [!TIP]
+> **Click the image above to watch the video.**
+> *(Note: Use Cmd/Ctrl + Click to open in a new tab).*
 ---
 
 ## 🛠️ Cloudflare Native Stack
