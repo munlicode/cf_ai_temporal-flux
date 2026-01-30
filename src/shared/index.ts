@@ -21,7 +21,7 @@ export interface StreamBlock {
   tags: string[];
   startTime: string; // ISO string
   endTime: string; // ISO string
-  status: "pending" | "completed" | "cancelled";
+  completed: boolean;
 }
 
 export type EventType =

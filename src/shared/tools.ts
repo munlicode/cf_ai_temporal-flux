@@ -18,6 +18,20 @@ export const scheduleBlockSchema = {
   }),
 };
 
+export const completeBlockSchema = {
+  description: "Mark an existing block on the timeline as completed",
+  parameters: z.object({
+    id: z.string().describe("The ID of the block to mark as completed"),
+  }),
+};
+
+export const uncompleteBlockSchema = {
+  description: "Mark an existing block on the timeline as not completed",
+  parameters: z.object({
+    id: z.string().describe("The ID of the block to mark as not completed"),
+  }),
+};
+
 export const updateBlockSchema = {
   description: "Update an existing block on the timeline",
   parameters: z.object({
@@ -29,7 +43,7 @@ export const updateBlockSchema = {
         priority: z.enum(["high", "medium", "low"]).optional(),
         startTime: z.string().optional(),
         endTime: z.string().optional(),
-        status: z.enum(["pending", "completed", "cancelled"]).optional(),
+        completed: z.boolean().optional(),
         tags: z
           .preprocess((val) => {
             if (typeof val === "string") {

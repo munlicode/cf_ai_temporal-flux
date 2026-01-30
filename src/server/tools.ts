@@ -10,6 +10,8 @@ import {
   switchPlanSchema,
   listPlansSchema,
   deletePlanSchema,
+  completeBlockSchema,
+  uncompleteBlockSchema,
 } from "@shared";
 
 /**
@@ -40,7 +42,7 @@ const scheduleBlock = tool({
       tags: input.tags || [],
       startTime,
       endTime,
-      status: "pending" as const,
+      completed: false,
     };
 
     agent!.scheduleBlocks([newBlock]);

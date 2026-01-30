@@ -34,6 +34,8 @@ export function CommandInfo() {
         },
         { label: "Update task", command: "'Set workout to high priority'" },
         { label: "Delete task", command: "'Delete the first task'" },
+        { label: "Complete task", command: "'Mark workout as completed'" },
+        { label: "Uncomplete task", command: "'Mark workout as incomplete'" },
       ],
     },
     {

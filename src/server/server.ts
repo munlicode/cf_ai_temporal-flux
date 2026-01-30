@@ -28,6 +28,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   private logger: Logger;
 
   constructor(state: DurableObjectState, env: Env) {
+    // @ts-ignore - DurableObjectState mismatch between Workers and AIChatAgent
     super(state, env);
     this.logger = createLogger(env.LOG_LEVEL);
     this.logger.info(`[Chat] Initializing instance: ${state.id.toString()}`);
@@ -231,12 +232,15 @@ export class Chat extends AIChatAgent<Env, FluxState> {
       updatedAt: new Date().toISOString(),
     };
 
-    this.saveActivePlan(updatedPlan);
-
+    const currentState = this.state;
     this.setState({
-      ...this.state,
+      ...currentState,
+      plans: {
+        ...(currentState.plans || {}),
+        [updatedPlan.id]: updatedPlan,
+      },
       events: [
-        ...(this.state.events || []),
+        ...(currentState.events || []),
         {
           id: generateId(),
           type: "BLOCK_SCHEDULED",
@@ -252,13 +256,20 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * Internal method to update an existing block
    */
   public updateBlockState(id: string, updates: Partial<StreamBlock>) {
+    this.logger.info(`[Chat] Updating block ${id}`, updates);
     const activePlan = this.getActivePlan();
-    if (!activePlan) return null;
+    if (!activePlan) {
+      this.logger.warn(`[Chat] No active plan found for block update ${id}`);
+      return null;
+    }
 
     const stream = activePlan.stream;
     const blockIndex = stream.findIndex((b) => b.id === id);
 
-    if (blockIndex === -1) return null;
+    if (blockIndex === -1) {
+      this.logger.warn(`[Chat] Block ${id} not found in plan ${activePlan.id}`);
+      return null;
+    }
 
     const updatedBlock = { ...stream[blockIndex], ...updates };
     const newStream = [...stream];
@@ -270,12 +281,20 @@ export class Chat extends AIChatAgent<Env, FluxState> {
       updatedAt: new Date().toISOString(),
     };
 
-    this.saveActivePlan(updatedPlan);
+    const plans = {
+      ...(this.state.plans || {}),
+      [updatedPlan.id]: updatedPlan,
+    };
 
+    const currentState = this.state;
     this.setState({
-      ...this.state,
+      ...currentState,
+      plans: {
+        ...(currentState.plans || {}),
+        [updatedPlan.id]: updatedPlan,
+      },
       events: [
-        ...(this.state.events || []),
+        ...(currentState.events || []),
         {
           id: generateId(),
           type: "BLOCK_UPDATED",
@@ -288,11 +307,31 @@ export class Chat extends AIChatAgent<Env, FluxState> {
   }
 
   /**
+   * High-level method to complete a block
+   */
+  public completeBlockState(id: string) {
+    this.logger.info(`[Chat] Completing block ${id}`);
+    return this.updateBlockState(id, { completed: true });
+  }
+
+  /**
+   * High-level method to uncomplete a block
+   */
+  public uncompleteBlockState(id: string) {
+    this.logger.info(`[Chat] Uncompleting block ${id}`);
+    return this.updateBlockState(id, { completed: false });
+  }
+
+  /**
    * Internal method to delete a block
    */
   public deleteBlockState(id: string) {
+    this.logger.info(`[Chat] Deleting block ${id}`);
     const activePlan = this.getActivePlan();
-    if (!activePlan) return;
+    if (!activePlan) {
+      this.logger.warn(`[Chat] No active plan found for block deletion ${id}`);
+      return;
+    }
 
     const stream = activePlan.stream;
     const newStream = stream.filter((b) => b.id !== id);
@@ -303,12 +342,20 @@ export class Chat extends AIChatAgent<Env, FluxState> {
       updatedAt: new Date().toISOString(),
     };
 
-    this.saveActivePlan(updatedPlan);
+    const plans = {
+      ...(this.state.plans || {}),
+      [updatedPlan.id]: updatedPlan,
+    };
 
+    const currentState = this.state;
     this.setState({
-      ...this.state,
+      ...currentState,
+      plans: {
+        ...(currentState.plans || {}),
+        [updatedPlan.id]: updatedPlan,
+      },
       events: [
-        ...(this.state.events || []),
+        ...(currentState.events || []),
         {
           id: generateId(),
           type: "BLOCK_DELETED",
@@ -350,7 +397,20 @@ export class Chat extends AIChatAgent<Env, FluxState> {
    * Method called by the ArchitectWorkflow to push results into the state
    */
   async addTasksFromWorkflow(tasks: any[]) {
+    const activePlan = this.getActivePlan();
     let lastEndTime = new Date();
+
+    if (activePlan && activePlan.stream.length > 0) {
+      // Find the latest endTime among non-completed blocks
+      const activeBlocks = activePlan.stream.filter((b) => !b.completed);
+      if (activeBlocks.length > 0) {
+        const latestBlock = activeBlocks.reduce((prev, current) =>
+          new Date(prev.endTime) > new Date(current.endTime) ? prev : current,
+        );
+        lastEndTime = new Date(latestBlock.endTime);
+      }
+    }
+
     // Round to next 5 minute interval
     lastEndTime.setMinutes(Math.ceil(lastEndTime.getMinutes() / 5) * 5, 0, 0);
 
@@ -369,7 +429,7 @@ export class Chat extends AIChatAgent<Env, FluxState> {
         tags: ["architect", "auto-generated"],
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
-        status: "pending" as const,
+        completed: false,
       };
     });
 
@@ -410,7 +470,10 @@ export class Chat extends AIChatAgent<Env, FluxState> {
     options?: { abortSignal?: AbortSignal },
   ) {
     const ai = createWorkersAI({ binding: this.env.AI });
-    const model = ai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    const model = ai(
+      // @ts-ignore - model name type mismatch
+      "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    );
 
     // Collect all tools, including MCP tools
     let mcpTools = {};

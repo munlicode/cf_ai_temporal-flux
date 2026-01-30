@@ -56,6 +56,11 @@ export default function App() {
     events: [],
   });
 
+  // Optimistic UI state for block completion
+  const [optimisticCompleted, setOptimisticCompleted] = useState<
+    Record<string, boolean>
+  >({});
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -96,11 +101,38 @@ export default function App() {
     agent: "chat",
     name: userId,
     onStateUpdate: (newState) => {
-      // Merge with initial state structure to prevent bugs if partial state is sent
-      setFluxState((prev) => ({
-        ...prev,
-        ...newState,
-      }));
+      setFluxState((prev) => {
+        const next = { ...prev, ...newState };
+        // Deep merge plans
+        if (newState.plans) {
+          next.plans = { ...prev.plans, ...newState.plans };
+        }
+        return next;
+      });
+
+      // Clear optimistic state only when server state matches optimistic state
+      if (newState.plans) {
+        setOptimisticCompleted((prev) => {
+          const next = { ...prev };
+          let changed = false;
+          for (const planId in newState.plans) {
+            const plan = newState.plans[planId];
+            if (plan.stream) {
+              for (const block of plan.stream) {
+                // Only clear if the server state now matches our optimistic intent
+                if (block.id in next && block.completed === next[block.id]) {
+                  console.log(
+                    `[App] server caught up for block ${block.id}, clearing optimistic state`,
+                  );
+                  delete next[block.id];
+                  changed = true;
+                }
+              }
+            }
+          }
+          return changed ? next : prev;
+        });
+      }
     },
   });
 
@@ -174,6 +206,45 @@ export default function App() {
       });
     },
     [sendMessage],
+  );
+
+  const handleToggleBlock = useCallback(
+    async (id: string, completed: boolean) => {
+      console.log(`[App] Toggling block ${id} to ${completed} (Optimistic)`);
+      // Set optimistic state immediately for instant feedback
+      setOptimisticCompleted((prev) => ({ ...prev, [id]: completed }));
+
+      try {
+        // Try calling the agent RPC directly for fast response
+        // @ts-ignore
+        if (agent && agent.updateBlockState) {
+          console.log(`[App] Calling direct RPC updateBlockState for ${id}`);
+          // @ts-ignore
+          const result = await agent.updateBlockState(id, { completed });
+          console.log(`[App] RPC result for ${id}:`, result);
+          return;
+        } else {
+          console.warn(
+            "[App] agent.updateBlockState not available, falling back to message",
+          );
+        }
+      } catch (e) {
+        console.error(`[App] Direct RPC failed for ${id}:`, e);
+      }
+
+      // Fallback: send a message to the agent
+      console.log(`[App] Falling back to text command for ${id}`);
+      await sendMessage({
+        role: "user",
+        parts: [
+          {
+            type: "text",
+            text: `Mark block ${id} as ${completed ? "completed" : "incomplete"}`,
+          },
+        ],
+      });
+    },
+    [agent, sendMessage],
   );
 
   // Plan Handlers
@@ -306,11 +377,18 @@ export default function App() {
             blocks={
               fluxState.activePlanId &&
               fluxState.plans?.[fluxState.activePlanId]
-                ? fluxState.plans[fluxState.activePlanId].stream
+                ? fluxState.plans[fluxState.activePlanId].stream.map((b) => ({
+                    ...b,
+                    completed:
+                      optimisticCompleted[b.id] !== undefined
+                        ? optimisticCompleted[b.id]
+                        : b.completed,
+                  }))
                 : []
             }
             workflow={fluxState.workflow}
             onDeleteBlock={handleDeleteBlock}
+            onToggleBlock={handleToggleBlock}
           />
         </div>
 
