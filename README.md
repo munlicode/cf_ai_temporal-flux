@@ -5,6 +5,7 @@
 [**Live Demo → flux.kreoza.com**](https://flux.kreoza.com)
 
 ---
+
 ### 🚀 What you can do
 
 Flux understands natural language. You can talk to it like a project manager or a coworker.
@@ -57,7 +58,8 @@ To break it, the first step must be a 'quick start'—a way to turn that quiet i
 
 > [!TIP]
 > **Click the image above to watch the video.**
-> *(Note: Use Cmd/Ctrl + Click to open in a new tab).*
+> _(Note: Use Cmd/Ctrl + Click to open in a new tab)._
+
 ---
 
 ## 🛠️ Cloudflare Native Stack
@@ -95,21 +97,29 @@ We strictly adhere to the Cloudflare "Fast Track" requirements, leveraging the e
 
 ## ⚙️ Quick Start
 
+This project uses **pnpm** for high-speed, deterministic builds. You don't need to install it globally—`npx` will handle it for you.
+
 ```bash
-# 1. Setup
-pnpm install
+# 1. Install dependencies
+npx pnpm install
+
+# 2. Authenticate (Required for Workers AI)
 npx wrangler login
 
-# 2. Develop (Local)
-pnpm dev
+# 3. Develop (Local)
+# Starts the React frontend + Cloudflare Worker environment
+npx pnpm dev
 
-# 3. Environment Variables
+# 4. Environment Variables
 # Copy the example and adjust if needed
 cp .dev.vars.example .dev.vars
 
-# 4. Deploy (Production)
-pnpm run deploy
+# 5. Deploy (Production)
+npx pnpm run deploy
 ```
+
+> [!NOTE]
+> **Why pnpm?** We chose pnpm to ensure 100% deterministic builds and to leverage its superior speed. If you prefer to use `npm` or `yarn`, we recommend sticking to `pnpm` via `npx` to maintain lockfile consistency.
 
 ### Environment Variables
 
@@ -134,8 +144,9 @@ For production, you can set variables via the Cloudflare Dashboard.
 - Thank you for reading this far.
 - I thank Cloudflare for offering intern opportunity.
 - I thank life for everything.
-- I thank my family ヾ( ˃ᴗ˂ )◞ • *✰
-- Thank me 	(˵ ͡° ͜ʖ ͡°˵)
+- I thank my family ヾ( ˃ᴗ˂ )◞ • \*✰
+- Thank me (˵ ͡° ͜ʖ ͡°˵)
+
 ---
 
 _Built for the Cloudflare AI Challenge and high-speed project prototyping._

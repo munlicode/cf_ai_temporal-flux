@@ -3,6 +3,11 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
+	"packageManager": "pnpm@10.28.2",
+	"engines": {
+		"node": ">=20.0.0",
+		"pnpm": ">=10.0.0"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
@@ -13,7 +18,7 @@
 		"lint": "biome lint .",
 		"format": "biome format . --write",
 		"check": "biome check . && tsc --noEmit",
-		"clean": "rm -rf node_modules && rm -rf apps/*/node_modules && rm -rf apps/*/dist && rm -rf apps/*/.wrangler"
+		"clean": "rm -rf node_modules dist .wrangler"
 	},
 	"dependencies": {
 		"@ai-sdk/react": "^3.0.51",
