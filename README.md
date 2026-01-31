@@ -26,6 +26,7 @@ Add or modify tasks directly on your timeline.
 - `Remind me to buy milk at 6pm`
 - `Change my 3pm meeting to be high priority`
 - `Delete the task about German grammar`
+- `Mark the task 'Buy milk' as completed` (or unmark it)
 
 #### 3. Contextual Plans
 

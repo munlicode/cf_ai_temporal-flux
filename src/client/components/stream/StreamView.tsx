@@ -4,6 +4,8 @@ import {
   ClockIcon,
   CalendarDotsIcon,
   TrashIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/button/Button";
 import { useEffect, useState, useMemo } from "react";
@@ -14,12 +16,14 @@ interface StreamViewProps {
   blocks: StreamBlock[];
   workflow?: WorkflowStatus;
   onDeleteBlock: (id: string) => void;
+  onToggleBlock: (id: string, completed: boolean) => void;
 }
 
 export function StreamView({
   blocks,
   workflow,
   onDeleteBlock,
+  onToggleBlock,
 }: StreamViewProps) {
   const [now, setNow] = useState(new Date());
 
@@ -143,11 +147,9 @@ export function StreamView({
                 {/* Block Card */}
                 <Card
                   className={`p-3 border-l-4 ${
-                    block.status === "completed"
+                    block.completed
                       ? "border-l-green-500 opacity-60"
-                      : block.status === "cancelled"
-                        ? "border-l-red-500 opacity-40"
-                        : "border-l-brand-500"
+                      : "border-l-brand-500"
                   } bg-ob-base-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden`}
                 >
                   <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -164,13 +166,62 @@ export function StreamView({
                       <TrashIcon size={14} />
                     </Button>
                   </div>
-                  <div className="flex justify-between items-start pr-6">
-                    <div className="space-y-1">
-                      <h3 className="font-semibold text-sm text-ob-text-primary">
+
+                  <div className="flex gap-3 items-start">
+                    {/* Completion Toggle */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onToggleBlock(block.id, !block.completed);
+                      }}
+                      className={`shrink-0 mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all group/toggle ${
+                        block.completed
+                          ? "bg-green-500 border-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)] hover:bg-red-500 hover:border-red-500"
+                          : "bg-ob-base-200 border-ob-border hover:border-green-500 hover:bg-green-500"
+                      }`}
+                    >
+                      {block.completed ? (
+                        <>
+                          <CheckCircleIcon
+                            size={14}
+                            weight="bold"
+                            className="block group-hover/toggle:hidden"
+                          />
+                          <XCircleIcon
+                            size={14}
+                            weight="bold"
+                            className="hidden group-hover/toggle:block"
+                          />
+                        </>
+                      ) : (
+                        <CheckCircleIcon
+                          size={14}
+                          weight="bold"
+                          className="text-white opacity-0 group-hover/toggle:opacity-100 transition-opacity"
+                        />
+                      )}
+                    </button>
+
+                    <div className="flex-1 space-y-1">
+                      <h3
+                        className={`font-semibold text-sm transition-all ${
+                          block.completed
+                            ? "text-ob-text-secondary line-through opacity-70"
+                            : "text-ob-text-primary"
+                        }`}
+                      >
                         {block.title}
                       </h3>
                       {block.description && (
-                        <p className="text-xs text-ob-text-secondary line-clamp-2 leading-relaxed">
+                        <p
+                          className={`text-xs leading-relaxed line-clamp-2 transition-all ${
+                            block.completed
+                              ? "text-ob-text-secondary/50"
+                              : "text-ob-text-secondary"
+                          }`}
+                        >
                           {block.description}
                         </p>
                       )}
@@ -179,7 +230,7 @@ export function StreamView({
                           <ClockIcon size={12} />
                           {duration} mins
                         </span>
-                        {block.priority === "high" && (
+                        {block.priority === "high" && !block.completed && (
                           <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
                             High Priority
                           </span>

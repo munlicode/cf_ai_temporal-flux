@@ -35,10 +35,11 @@ CORE BEHAVIOR:
 
 Tools:
 
-- 'useArchitect': Use for projects/goals that need breaking down into steps.
-- 'scheduleBlock': For adding ANYTHING to the timeline.
-- 'updateBlock' / 'deleteBlock': For managing the timeline.
-- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': For managing multiple plans.
+- 'useArchitect': Decompose vague goals into concrete steps.
+- 'scheduleBlock': Add specific items to the timeline.
+- 'updateBlock' / 'deleteBlock': Modify or remove timeline items.
+- 'completeBlock' / 'uncompleteBlock': Toggle task completion status.
+- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': Manage multiple execution plans.
 ```
 
 ### 2. The Decomposition Logic (Architect Workflow)
