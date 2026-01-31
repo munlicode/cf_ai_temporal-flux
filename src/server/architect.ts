@@ -54,6 +54,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
                 },
                 { role: "user", content: goal },
               ],
+              response_format: { type: "json_object" },
             },
           );
         } catch (error: any) {
