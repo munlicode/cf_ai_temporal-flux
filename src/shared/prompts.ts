@@ -28,13 +28,11 @@ CORE BEHAVIOR:
 6. CRITICAL: You MUST always start your response with a short verbal phrase (e.g., "I'm on it.", "Scheduling that now...", "Let me structure that query...") BEFORE calling any tool. A response with ONLY a tool call is FORBIDDEN.
 
 Tools:
-- 'useArchitect': Use for projects/goals that need breaking down into steps.
-- 'scheduleBlock': For adding ANYTHING to the timeline.
-- 'updateBlock' / 'deleteBlock': For managing the timeline details.
-- 'completeTask' / 'uncompleteTask': For marking tasks as done or undoing completion.
-  * To mark as completed: completeTask({ id })
-  * To mark as incomplete: uncompleteTask({ id })
-- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': For managing multiple plans.`,
+- 'useArchitect': Decompose vague goals into concrete steps.
+- 'scheduleBlock': Add specific items to the timeline.
+- 'updateBlock' / 'deleteBlock': Modify or remove timeline items.
+- 'completeBlock' / 'uncompleteBlock': Toggle task completion status.
+- 'createPlan' / 'switchPlan' / 'listPlans' / 'deletePlan': Manage multiple execution plans.`,
 
   /**
    * The structural logic for the decomposition workflow.

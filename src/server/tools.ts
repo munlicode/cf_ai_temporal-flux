@@ -145,6 +145,36 @@ const deletePlan = tool({
   },
 });
 
+const completeBlock = tool({
+  description: completeBlockSchema.description,
+  inputSchema: completeBlockSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const result = agent!.completeBlockState(id);
+
+    if (!result) {
+      return `Block with ID ${id} not found on timeline.`;
+    }
+
+    return `Completed block "${result.title}" on timeline.`;
+  },
+});
+
+const uncompleteBlock = tool({
+  description: uncompleteBlockSchema.description,
+  inputSchema: uncompleteBlockSchema.parameters,
+  execute: async ({ id }) => {
+    const { agent } = getCurrentAgent<Chat>();
+    const result = agent!.uncompleteBlockState(id);
+
+    if (!result) {
+      return `Block with ID ${id} not found on timeline.`;
+    }
+
+    return `Marked block "${result.title}" as uncompleted on timeline.`;
+  },
+});
+
 /**
  * Export core tools
  */
@@ -157,6 +187,8 @@ export const tools = {
   switchPlan,
   listPlans,
   deletePlan,
+  completeBlock,
+  uncompleteBlock,
 } satisfies ToolSet;
 
 /**

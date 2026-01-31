@@ -57,7 +57,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
             },
           );
         } catch (error: any) {
-          console.error(`[Architect] AI.run failed:`, error);
+          logger.error(`[Architect] AI.run failed:`, error);
           throw new Error(`AI.run failed: ${error.message || error}`);
         }
       })
@@ -145,7 +145,7 @@ export class ArchitectWorkflow extends WorkflowEntrypoint<Env> {
           logger.info(`[Architect] Decomposed into ${tasks.length} tasks`);
           return tasks;
         } catch (e) {
-          console.error(`[Architect] Parsing failed:`, e);
+          logger.error(`[Architect] Parsing failed:`, e);
           throw new Error(
             `JSON Parsing Failed: ${e instanceof Error ? e.message : String(e)}`,
           );
