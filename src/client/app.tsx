@@ -46,7 +46,7 @@ export default function App() {
   const [textareaHeight, setTextareaHeight] = useState("auto");
   const [mobileView, setMobileView] = useState<"timeline" | "chat">(() => {
     const saved = localStorage.getItem("flux_mobile_view");
-    return (saved as "timeline" | "chat") || "timeline";
+    return (saved as "timeline" | "chat") || "chat";
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

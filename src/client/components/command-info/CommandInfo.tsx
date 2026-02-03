@@ -66,7 +66,7 @@ export function CommandInfo() {
             className="fixed inset-0 z-50 bg-black/5 backdrop-blur-[2px]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-10 right-0 w-80 bg-ob-base-100 border border-ob-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="fixed sm:absolute top-14 sm:top-10 right-4 left-4 sm:left-auto sm:right-0 sm:w-80 bg-ob-base-100 border border-ob-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="p-4 border-b border-ob-border flex justify-between items-center bg-ob-base-200/50">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <MagicWand size={18} className="text-brand-500" />
