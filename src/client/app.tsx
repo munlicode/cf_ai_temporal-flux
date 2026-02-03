@@ -18,6 +18,7 @@ import { ToolInvocationCard } from "@/components/tool-invocation-card/ToolInvoca
 import { StreamView } from "@/components/stream/StreamView";
 import { PlanSwitcher } from "@/components/plan-switcher/PlanSwitcher";
 import { CommandInfo } from "@/components/command-info/CommandInfo";
+import { EventLogView } from "@/components/event-log/EventLogView";
 
 // Icon imports
 // Icon imports (explicitly imported for better tree-shaking)
@@ -127,7 +128,7 @@ export default function App() {
               for (const block of plan.stream) {
                 // Only clear if the server state now matches our optimistic intent
                 if (block.id in next && block.completed === next[block.id]) {
-                  console.log(
+                  console.debug(
                     `[App] server caught up for block ${block.id}, clearing optimistic state`,
                   );
                   delete next[block.id];
@@ -216,30 +217,26 @@ export default function App() {
 
   const handleToggleBlock = useCallback(
     async (id: string, completed: boolean) => {
-      console.log(`[App] Toggling block ${id} to ${completed} (Optimistic)`);
       // Set optimistic state immediately for instant feedback
       setOptimisticCompleted((prev) => ({ ...prev, [id]: completed }));
 
       try {
         // Try calling the agent RPC directly for fast response
+        // In some versions of agents library, custom DO methods are on the top level
         // @ts-ignore
-        if (agent && agent.updateBlockState) {
-          console.log(`[App] Calling direct RPC updateBlockState for ${id}`);
-          // @ts-ignore
-          const result = await agent.updateBlockState(id, { completed });
-          console.log(`[App] RPC result for ${id}:`, result);
+        const rpcHandle = agent?.rpc || agent;
+        if (rpcHandle && typeof rpcHandle.updateBlockState === "function") {
+          await rpcHandle.updateBlockState(id, { completed });
           return;
-        } else {
-          console.warn(
-            "[App] agent.updateBlockState not available, falling back to message",
-          );
         }
       } catch (e) {
-        console.error(`[App] Direct RPC failed for ${id}:`, e);
+        console.debug(
+          `[App] Direct RPC update not available yet, using fallback`,
+          e,
+        );
       }
 
-      // Fallback: send a message to the agent
-      console.log(`[App] Falling back to text command for ${id}`);
+      // Fallback: send a functional command to the agent
       await sendMessage({
         role: "user",
         parts: [
@@ -396,6 +393,11 @@ export default function App() {
             onDeleteBlock={handleDeleteBlock}
             onToggleBlock={handleToggleBlock}
           />
+          {showDebug && (
+            <div className="hidden md:block h-64 border-t-2 border-brand-500/30 shrink-0">
+              <EventLogView events={fluxState.events || []} />
+            </div>
+          )}
         </div>
 
         {/* Right Column: Chat (Copilot) */}
@@ -474,7 +476,7 @@ export default function App() {
 
                     <div className="flex flex-col gap-1 w-full">
                       {showDebug && (
-                        <div className="flex flex-col gap-2 mb-2">
+                        <div className="hidden md:flex flex-col gap-2 mb-2">
                           <div className="flex items-center gap-2 text-[10px] text-ob-text-secondary/60 font-mono uppercase tracking-widest bg-ob-base-200/50 px-2 py-1 rounded border border-ob-border w-fit">
                             <BugIcon size={10} />
                             Debug info

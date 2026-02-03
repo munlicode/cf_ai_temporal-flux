@@ -20,12 +20,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          radix: [
-            "@radix-ui/react-avatar",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-slot",
-            "@radix-ui/react-switch",
-          ],
+          radix: ["@radix-ui/react-dropdown-menu"],
         },
       },
     },

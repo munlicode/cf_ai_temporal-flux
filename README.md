@@ -91,7 +91,7 @@ We strictly adhere to the Cloudflare "Fast Track" requirements, leveraging the e
 ## 🏗️ Technical Highlights
 
 - **JSON Self-Healing**: The Architect workflow includes logic to detect and repair truncated or invalid JSON responses from the LLM, ensuring reliability at the edge.
-- **Event Logging**: Every state mutation is logged as an immutable event, enabling full audit trails and providing a foundation for future "Time Travel" / Undo capabilities.
+- **Event Logging**: Every state mutation is logged as an event, providing a complete audit trail for both AI and user actions. This serves as the architectural foundation for future "Time Travel" and Undo/Redo capabilities via event replay.
 - **AI-Native Workflow**: This project was built using an AI-native development process. Our **System Prompts**, tool definitions, and architectural roadmap are documented in **[PROMPTS.md](./PROMPTS.md)**.
 
 ---
