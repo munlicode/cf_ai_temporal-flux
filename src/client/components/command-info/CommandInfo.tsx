@@ -66,8 +66,8 @@ export function CommandInfo() {
             className="fixed inset-0 z-50 bg-black/5 backdrop-blur-[2px]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed sm:absolute top-14 sm:top-10 right-4 left-4 sm:left-auto sm:right-0 sm:w-80 bg-ob-base-100 border border-ob-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="p-4 border-b border-ob-border flex justify-between items-center bg-ob-base-200/50">
+          <div className="fixed sm:absolute top-16 sm:top-10 right-4 left-4 sm:left-auto sm:right-0 sm:w-80 max-h-[calc(100dvh-8rem)] sm:max-h-[70vh] bg-ob-base-100 border border-ob-border rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="p-4 border-b border-ob-border flex justify-between items-center bg-ob-base-200/50 shrink-0">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <MagicWand size={18} className="text-brand-500" />
                 How to talk to Flux
@@ -80,7 +80,7 @@ export function CommandInfo() {
               </button>
             </div>
 
-            <div className="p-4 space-y-5 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 space-y-5 overflow-y-auto flex-1">
               {commandGroups.map((group) => (
                 <div key={group.title} className="space-y-2">
                   <div className="flex items-center gap-2 text-xs font-bold text-ob-text-secondary uppercase tracking-widest px-1">
@@ -106,7 +106,7 @@ export function CommandInfo() {
               ))}
             </div>
 
-            <div className="p-3 bg-brand-500/5 border-t border-ob-border text-center">
+            <div className="p-3 bg-brand-500/5 border-t border-ob-border text-center shrink-0">
               <p className="text-[10px] text-ob-text-secondary">
                 Flux understands natural language. Just tell it what you want.
               </p>
