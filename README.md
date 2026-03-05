@@ -61,7 +61,9 @@ To break it, the first step must be a 'quick start'—a way to turn that quiet i
 > **Click the image above to watch the video.**
 > _(Note: Use Cmd/Ctrl + Click to open in a new tab)._
 
----
+### Why Cloudflare
+
+**[Why Cloudflare](./why-cloudflare.md)**: More on why I decided on cloudflare.
 
 ## 🛠️ Cloudflare Native Stack
 
